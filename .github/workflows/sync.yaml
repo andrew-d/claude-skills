@@ -1,0 +1,38 @@
+name: Sync upstream skills
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Weekly on Monday 9am UTC
+  workflow_dispatch: {}   # Manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Run sync
+        run: python sync.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automated/upstream-sync
+          title: 'chore: sync upstream skills'
+          commit-message: 'chore: sync upstream skills'
+          body: |
+            Automated sync from upstream skill repositories.
+
+            **Review the diff carefully** — skills can contain instructions that affect Claude's behavior.
+          delete-branch: true
