@@ -10,6 +10,7 @@ import yaml
 from sync import (
     clone_upstream,
     copy_plugin,
+    generate_marketplace,
     load_config,
     parse_plugin_filter,
     parse_skill_filter,
@@ -421,3 +422,170 @@ class TestSyncUpstream:
 
                     # Verify cleanup was attempted
                     assert cleanup_called
+
+
+class TestGenerateMarketplace:
+    """Test marketplace.json generation."""
+
+    def test_generate_marketplace_creates_valid_json(self, tmp_path):
+        """AC3.1: marketplace.json is generated from plugins in plugins/ directory."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        # Create two fake plugins
+        for plugin_name in ["plugin-a", "plugin-b"]:
+            plugin_dir = plugins_dir / plugin_name
+            plugin_dir.mkdir()
+            claude_plugin_dir = plugin_dir / ".claude-plugin"
+            claude_plugin_dir.mkdir()
+
+            plugin_json = {
+                "version": "1.0.0",
+                "description": f"Description for {plugin_name}",
+                "author": {"name": "Test Author"},
+            }
+            (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        output_file = tmp_path / "marketplace.json"
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        assert output_file.exists()
+        with open(output_file) as f:
+            marketplace = json.load(f)
+
+        assert marketplace["name"] == "claude-skills-mirror"
+        assert marketplace["owner"]["name"] == "Mirrored"
+        assert len(marketplace["plugins"]) == 2
+
+    def test_generate_marketplace_uses_namespaced_names(self, tmp_path):
+        """AC3.2: Plugin names in marketplace.json use namespaced names."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        plugin_dir = plugins_dir / "trailofbits--git-cleanup"
+        plugin_dir.mkdir()
+        claude_plugin_dir = plugin_dir / ".claude-plugin"
+        claude_plugin_dir.mkdir()
+
+        plugin_json = {
+            "version": "1.0.0",
+            "description": "Test",
+            "author": {"name": "Test"},
+        }
+        (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        output_file = tmp_path / "marketplace.json"
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        with open(output_file) as f:
+            marketplace = json.load(f)
+
+        assert marketplace["plugins"][0]["name"] == "trailofbits--git-cleanup"
+
+    def test_generate_marketplace_source_paths(self, tmp_path):
+        """AC3.3: marketplace.json source paths point to correct relative plugin directories."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        plugin_dir = plugins_dir / "trailofbits--foo"
+        plugin_dir.mkdir()
+        claude_plugin_dir = plugin_dir / ".claude-plugin"
+        claude_plugin_dir.mkdir()
+
+        plugin_json = {
+            "version": "1.0.0",
+            "description": "Test",
+            "author": {"name": "Test"},
+        }
+        (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        output_file = tmp_path / "marketplace.json"
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        with open(output_file) as f:
+            marketplace = json.load(f)
+
+        assert marketplace["plugins"][0]["source"] == "./plugins/trailofbits--foo"
+
+    def test_generate_marketplace_includes_plugin_metadata(self, tmp_path):
+        """AC3.4: marketplace.json includes correct version, description, and author."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        plugin_dir = plugins_dir / "test-plugin"
+        plugin_dir.mkdir()
+        claude_plugin_dir = plugin_dir / ".claude-plugin"
+        claude_plugin_dir.mkdir()
+
+        plugin_json = {
+            "version": "2.5.0",
+            "description": "A test plugin for verification",
+            "author": {"name": "Alice", "email": "alice@example.com"},
+        }
+        (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        output_file = tmp_path / "marketplace.json"
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        with open(output_file) as f:
+            marketplace = json.load(f)
+
+        plugin_entry = marketplace["plugins"][0]
+        assert plugin_entry["version"] == "2.5.0"
+        assert plugin_entry["description"] == "A test plugin for verification"
+        assert plugin_entry["author"]["name"] == "Alice"
+        assert plugin_entry["author"]["email"] == "alice@example.com"
+
+    def test_generate_marketplace_sorts_by_name(self, tmp_path):
+        """Marketplace plugins are sorted by name."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        # Create plugins in reverse order
+        for plugin_name in ["zzz-plugin", "aaa-plugin", "mmm-plugin"]:
+            plugin_dir = plugins_dir / plugin_name
+            plugin_dir.mkdir()
+            claude_plugin_dir = plugin_dir / ".claude-plugin"
+            claude_plugin_dir.mkdir()
+
+            plugin_json = {
+                "version": "1.0.0",
+                "description": f"Test {plugin_name}",
+            }
+            (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        output_file = tmp_path / "marketplace.json"
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        with open(output_file) as f:
+            marketplace = json.load(f)
+
+        names = [p["name"] for p in marketplace["plugins"]]
+        assert names == ["aaa-plugin", "mmm-plugin", "zzz-plugin"]
+
+    def test_generate_marketplace_creates_output_directory(self, tmp_path):
+        """generate_marketplace creates output directory if it doesn't exist."""
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        plugin_dir = plugins_dir / "test-plugin"
+        plugin_dir.mkdir()
+        claude_plugin_dir = plugin_dir / ".claude-plugin"
+        claude_plugin_dir.mkdir()
+
+        plugin_json = {"version": "1.0.0", "description": "Test"}
+        (claude_plugin_dir / "plugin.json").write_text(json.dumps(plugin_json))
+
+        # Output directory doesn't exist
+        output_file = tmp_path / "nested" / "dir" / "marketplace.json"
+        assert not output_file.parent.exists()
+
+        generate_marketplace(str(plugins_dir), str(output_file))
+
+        assert output_file.exists()
+        assert output_file.parent.exists()

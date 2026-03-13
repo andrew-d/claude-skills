@@ -330,6 +330,8 @@ def generate_marketplace(plugins_dir: str, output_path: str) -> None:
     """
     plugins_data = []
 
+    plugins_dir_basename = Path(plugins_dir).name
+
     for plugin_dir in sorted(Path(plugins_dir).iterdir()):
         if not plugin_dir.is_dir():
             continue
@@ -346,7 +348,7 @@ def generate_marketplace(plugins_dir: str, output_path: str) -> None:
             "version": plugin_json.get("version"),
             "description": plugin_json.get("description"),
             "author": plugin_json.get("author", {}),
-            "source": f"./{plugins_dir}/{plugin_dir.name}",
+            "source": f"./{plugins_dir_basename}/{plugin_dir.name}",
         }
 
         plugins_data.append(plugin_entry)
