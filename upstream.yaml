@@ -1,0 +1,4 @@
+upstreams:
+  - name: trailofbits
+    repo: https://github.com/trailofbits/skills
+    ref: main
