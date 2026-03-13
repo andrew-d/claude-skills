@@ -54,7 +54,15 @@ def parse_plugin_filter(upstream: dict) -> Tuple[str, Optional[Set[str]]]:
         )
 
     if "include" in plugins_config:
-        return "include", set(plugins_config["include"])
+        # Include list can have both strings and dicts
+        plugin_names = set()
+        for entry in plugins_config["include"]:
+            if isinstance(entry, str):
+                plugin_names.add(entry)
+            elif isinstance(entry, dict):
+                # Dict key is the plugin name
+                plugin_names.add(list(entry.keys())[0])
+        return "include", plugin_names
 
     if "exclude" in plugins_config:
         return "exclude", set(plugins_config["exclude"])
