@@ -1,6 +1,7 @@
 """Unit tests for sync.py - YAML parsing and filter logic."""
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -16,6 +17,7 @@ from sync import (
     parse_skill_filter,
     should_include_plugin,
     should_include_skill,
+    sync_all,
     sync_upstream,
 )
 
@@ -589,3 +591,118 @@ class TestGenerateMarketplace:
 
         assert output_file.exists()
         assert output_file.parent.exists()
+
+
+class TestSyncAll:
+    """Test sync_all orchestration logic."""
+
+    def test_sync_all_aggregates_results_from_multiple_upstreams(self, tmp_path):
+        """sync_all aggregates results from multiple upstreams."""
+        # Create config file
+        config_file = tmp_path / "upstream.yaml"
+        config_content = """
+upstreams:
+  - name: upstream1
+    repo: https://github.com/test/repo1
+    ref: main
+  - name: upstream2
+    repo: https://github.com/test/repo2
+    ref: main
+"""
+        config_file.write_text(config_content)
+
+        # Create plugins directory
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+
+        # Create two temporary clone directories
+        clone1_dir = tmp_path / ".tmp-clone1"
+        clone1_dir.mkdir()
+        plugins1 = clone1_dir / "plugins"
+        plugins1.mkdir()
+        plugin1_a = plugins1 / "plugin-a"
+        plugin1_a.mkdir()
+        (plugin1_a / "plugin.json").write_text("{}")
+
+        clone2_dir = tmp_path / ".tmp-clone2"
+        clone2_dir.mkdir()
+        plugins2 = clone2_dir / "plugins"
+        plugins2.mkdir()
+        plugin2_b = plugins2 / "plugin-b"
+        plugin2_b.mkdir()
+        (plugin2_b / "plugin.json").write_text("{}")
+
+        # Mock clone and tempfile to use our test directories
+        clone_counter = [0]
+
+        def mock_clone_upstream(repo_url, ref, dest):
+            # First call gets clone1, second gets clone2
+            if clone_counter[0] == 0:
+                shutil.copytree(str(clone1_dir), dest)
+            else:
+                shutil.copytree(str(clone2_dir), dest)
+            clone_counter[0] += 1
+
+        def mock_mkdtemp(**kwargs):
+            if clone_counter[0] == 0:
+                return str(tmp_path / "clone1")
+            else:
+                return str(tmp_path / "clone2")
+
+        with patch("sync.clone_upstream", side_effect=mock_clone_upstream):
+            with patch("sync.tempfile.mkdtemp", side_effect=mock_mkdtemp):
+                created = sync_all(str(config_file), str(plugins_dir))
+
+                # Should have created plugins from both upstreams
+                assert "upstream1--plugin-a" in created
+                assert "upstream2--plugin-b" in created
+                assert len(created) == 2
+
+    def test_sync_all_clears_preexisting_plugins_directory(self, tmp_path):
+        """sync_all clears pre-existing plugins directory content."""
+        # Create config file
+        config_file = tmp_path / "upstream.yaml"
+        config_content = """
+upstreams:
+  - name: upstream
+    repo: https://github.com/test/repo
+    ref: main
+"""
+        config_file.write_text(config_content)
+
+        # Create plugins directory with pre-existing content
+        plugins_dir = tmp_path / "plugins"
+        plugins_dir.mkdir()
+        old_plugin_dir = plugins_dir / "old-plugin"
+        old_plugin_dir.mkdir()
+        (old_plugin_dir / "old-file.txt").write_text("old content")
+
+        # Create mock clone template directory with new plugin
+        clone_template = tmp_path / ".tmp-clone-template"
+        clone_template.mkdir()
+        plugins_src = clone_template / "plugins"
+        plugins_src.mkdir()
+        new_plugin = plugins_src / "new-plugin"
+        new_plugin.mkdir()
+        (new_plugin / "plugin.json").write_text("{}")
+
+        clone_dirs_created = []
+
+        def mock_mkdtemp(**kwargs):
+            clone_dir = tmp_path / f".tmp-clone-{len(clone_dirs_created)}"
+            clone_dir.mkdir()
+            # Copy template to new location
+            shutil.copytree(str(clone_template), str(clone_dir), dirs_exist_ok=True)
+            clone_dirs_created.append(str(clone_dir))
+            return str(clone_dir)
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", side_effect=mock_mkdtemp):
+                created = sync_all(str(config_file), str(plugins_dir))
+
+                # Old plugin should be gone
+                assert not (plugins_dir / "old-plugin").exists()
+                # New plugin should exist
+                assert (plugins_dir / "upstream--new-plugin").exists()
+                # Old file should not exist
+                assert not (plugins_dir / "old-plugin" / "old-file.txt").exists()

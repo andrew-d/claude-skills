@@ -119,27 +119,38 @@ def parse_skill_filter(plugin_entry) -> Tuple[str, str, Optional[Set[str]]]:
     raise ValueError(f"Unexpected plugin entry format: {plugin_entry}")
 
 
+def should_include(
+    name: str, filter_type: str, filter_set: Optional[Set[str]]
+) -> bool:
+    """Determine if an item should be included based on filter.
+
+    Args:
+        name: Name of the item (plugin or skill)
+        filter_type: "all", "include", or "exclude"
+        filter_set: Set of item names (None if filter_type is "all")
+
+    Returns:
+        True if item should be included, False otherwise
+    """
+    if filter_type == "all":
+        return True
+    elif filter_type == "include":
+        return name in filter_set
+    elif filter_type == "exclude":
+        return name not in filter_set
+    else:
+        raise ValueError(f"Unknown filter_type: {filter_type}")
+
+
+# Backwards compatibility aliases
 def should_include_plugin(
     plugin_name: str, filter_type: str, filter_set: Optional[Set[str]]
 ) -> bool:
     """Determine if a plugin should be included based on filter.
 
-    Args:
-        plugin_name: Name of the plugin
-        filter_type: "all", "include", or "exclude"
-        filter_set: Set of plugin names (None if filter_type is "all")
-
-    Returns:
-        True if plugin should be included, False otherwise
+    Deprecated: Use should_include() instead.
     """
-    if filter_type == "all":
-        return True
-    elif filter_type == "include":
-        return plugin_name in filter_set
-    elif filter_type == "exclude":
-        return plugin_name not in filter_set
-    else:
-        raise ValueError(f"Unknown filter_type: {filter_type}")
+    return should_include(plugin_name, filter_type, filter_set)
 
 
 def should_include_skill(
@@ -147,22 +158,9 @@ def should_include_skill(
 ) -> bool:
     """Determine if a skill should be included based on filter.
 
-    Args:
-        skill_name: Name of the skill
-        filter_type: "all", "include", or "exclude"
-        filter_set: Set of skill names (None if filter_type is "all")
-
-    Returns:
-        True if skill should be included, False otherwise
+    Deprecated: Use should_include() instead.
     """
-    if filter_type == "all":
-        return True
-    elif filter_type == "include":
-        return skill_name in filter_set
-    elif filter_type == "exclude":
-        return skill_name not in filter_set
-    else:
-        raise ValueError(f"Unknown filter_type: {filter_type}")
+    return should_include(skill_name, filter_type, filter_set)
 
 
 def clone_upstream(repo_url: str, ref: str, dest: str) -> None:
@@ -295,11 +293,12 @@ def sync_upstream(upstream: dict, plugins_dir: str) -> list:
             shutil.rmtree(temp_dir)
 
 
-def sync_all(config_path: str = "upstream.yaml") -> list:
+def sync_all(config_path: str = "upstream.yaml", plugins_dir: str = "plugins") -> list:
     """Sync all upstream repositories.
 
     Args:
         config_path: Path to upstream.yaml
+        plugins_dir: Destination directory for plugins (default: "plugins")
 
     Returns:
         List of all created plugin names
@@ -307,15 +306,15 @@ def sync_all(config_path: str = "upstream.yaml") -> list:
     config = load_config(config_path)
 
     # Clear and recreate plugins directory
-    plugins_dir = Path("plugins")
-    if plugins_dir.exists():
-        shutil.rmtree(plugins_dir)
-    plugins_dir.mkdir()
+    plugins_dir_path = Path(plugins_dir)
+    if plugins_dir_path.exists():
+        shutil.rmtree(plugins_dir_path)
+    plugins_dir_path.mkdir()
 
     all_created_plugins = []
 
     for upstream in config.get("upstreams", []):
-        created = sync_upstream(upstream, str(plugins_dir))
+        created = sync_upstream(upstream, str(plugins_dir_path))
         all_created_plugins.extend(created)
 
     return all_created_plugins
@@ -374,13 +373,23 @@ def generate_marketplace(plugins_dir: str, output_path: str) -> None:
         json.dump(marketplace, f, indent=2)
 
 
-def main() -> None:
-    """Main entry point."""
-    created_plugins = sync_all()
+def main(
+    config_path: str = "upstream.yaml",
+    plugins_dir: str = "plugins",
+    marketplace_output_path: str = ".claude-plugin/marketplace.json",
+) -> None:
+    """Main entry point.
+
+    Args:
+        config_path: Path to upstream.yaml (default: "upstream.yaml")
+        plugins_dir: Destination directory for plugins (default: "plugins")
+        marketplace_output_path: Path for marketplace.json output (default: ".claude-plugin/marketplace.json")
+    """
+    created_plugins = sync_all(config_path, plugins_dir)
     logger.info(f"Created {len(created_plugins)} plugins")
 
     # Generate marketplace
-    generate_marketplace("plugins", ".claude-plugin/marketplace.json")
+    generate_marketplace(plugins_dir, marketplace_output_path)
     logger.info("Generated marketplace.json")
 
 
