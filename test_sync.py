@@ -8,11 +8,14 @@ from unittest.mock import patch
 import pytest
 from sync import (
     clone_upstream,
+    compute_effective_skill_filter,
     copy_plugin,
+    extract_marketplace_skills,
     generate_marketplace,
     load_config,
     parse_plugin_filter,
     parse_skill_filter,
+    read_upstream_marketplace,
     should_include_plugin,
     should_include_skill,
     sync_all,
@@ -422,6 +425,280 @@ class TestSyncUpstream:
 
                     # Verify cleanup was attempted
                     assert cleanup_called
+
+
+class TestReadUpstreamMarketplace:
+    """Test reading marketplace.json from cloned repos."""
+
+    def test_returns_parsed_marketplace(self, tmp_path):
+        """Reads and parses .claude-plugin/marketplace.json."""
+        claude_dir = tmp_path / ".claude-plugin"
+        claude_dir.mkdir()
+        marketplace = {
+            "plugins": [
+                {"name": "plugin-a", "source": "./plugins/plugin-a"},
+            ]
+        }
+        (claude_dir / "marketplace.json").write_text(json.dumps(marketplace))
+
+        result = read_upstream_marketplace(str(tmp_path))
+
+        assert result is not None
+        assert len(result["plugins"]) == 1
+        assert result["plugins"][0]["name"] == "plugin-a"
+
+    def test_returns_none_when_missing(self, tmp_path):
+        """Returns None when no marketplace.json exists."""
+        result = read_upstream_marketplace(str(tmp_path))
+        assert result is None
+
+
+class TestExtractMarketplaceSkills:
+    """Test extracting skill names from marketplace plugin entries."""
+
+    def test_extracts_skill_names_from_paths(self):
+        """Extracts directory names from skill paths like ./skills/foo."""
+        entry = {
+            "name": "test-plugin",
+            "skills": [
+                "./skills/codable-patterns",
+                "./skills/swift-charts",
+            ],
+        }
+        result = extract_marketplace_skills(entry)
+        assert result == {"codable-patterns", "swift-charts"}
+
+    def test_returns_none_when_no_skills_key(self):
+        """Returns None when plugin entry has no skills array."""
+        entry = {"name": "test-plugin", "source": "./plugins/test"}
+        result = extract_marketplace_skills(entry)
+        assert result is None
+
+
+class TestComputeEffectiveSkillFilter:
+    """Test composing marketplace skills with user filters."""
+
+    def test_no_marketplace_skills_returns_user_filter(self):
+        """When marketplace has no skill list, user filter is used as-is."""
+        eff_type, eff_set = compute_effective_skill_filter(
+            None, "exclude", {"skill-b"}
+        )
+        assert eff_type == "exclude"
+        assert eff_set == {"skill-b"}
+
+    def test_marketplace_skills_with_user_all(self):
+        """Marketplace skills become include filter when user filter is 'all'."""
+        eff_type, eff_set = compute_effective_skill_filter(
+            {"a", "b", "c"}, "all", None
+        )
+        assert eff_type == "include"
+        assert eff_set == {"a", "b", "c"}
+
+    def test_marketplace_skills_with_user_exclude(self):
+        """User exclude removes skills from marketplace set."""
+        eff_type, eff_set = compute_effective_skill_filter(
+            {"a", "b", "c"}, "exclude", {"b"}
+        )
+        assert eff_type == "include"
+        assert eff_set == {"a", "c"}
+
+    def test_marketplace_skills_with_user_include(self):
+        """User include intersects with marketplace set."""
+        eff_type, eff_set = compute_effective_skill_filter(
+            {"a", "b", "c"}, "include", {"a", "c", "d"}
+        )
+        assert eff_type == "include"
+        assert eff_set == {"a", "c"}
+
+
+class TestSyncUpstreamWithMarketplace:
+    """Test sync_upstream using marketplace.json for plugin discovery."""
+
+    def _create_marketplace_upstream(self, tmp_path, plugins):
+        """Helper to create a fake upstream with marketplace.json.
+
+        Args:
+            tmp_path: pytest tmp_path fixture
+            plugins: list of dicts with 'name', 'source', and optionally 'skills'
+        """
+        clone_dir = tmp_path / "clone"
+        clone_dir.mkdir()
+
+        # Create marketplace.json
+        claude_dir = clone_dir / ".claude-plugin"
+        claude_dir.mkdir()
+        marketplace = {"plugins": plugins}
+        (claude_dir / "marketplace.json").write_text(json.dumps(marketplace))
+
+        return clone_dir
+
+    def test_discovers_plugins_via_marketplace(self, tmp_path):
+        """Plugins are discovered from marketplace.json instead of plugins/ dir."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {"name": "plugin-a", "source": "./plugins/plugin-a"},
+            {"name": "plugin-b", "source": "./plugins/plugin-b"},
+        ])
+
+        # Create the actual plugin directories
+        for name in ["plugin-a", "plugin-b"]:
+            plugin_dir = clone_dir / "plugins" / name
+            plugin_dir.mkdir(parents=True)
+            (plugin_dir / "README.md").write_text(f"# {name}")
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "myupstream",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                created = sync_upstream(upstream, str(plugins_output_dir))
+
+        assert "myupstream--plugin-a" in created
+        assert "myupstream--plugin-b" in created
+        assert (plugins_output_dir / "myupstream--plugin-a").exists()
+        assert (plugins_output_dir / "myupstream--plugin-b").exists()
+
+    def test_shared_root_source_copies_only_declared_skills(self, tmp_path):
+        """For source './', only skills listed in the marketplace entry are kept."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {
+                "name": "swift-core-skills",
+                "source": "./",
+                "skills": ["./skills/swift-lang", "./skills/swift-testing"],
+            },
+        ])
+
+        # Create skills at the repo root
+        skills_dir = clone_dir / "skills"
+        skills_dir.mkdir()
+        for skill in ["swift-lang", "swift-testing", "swiftui-animation", "other"]:
+            skill_dir = skills_dir / skill
+            skill_dir.mkdir()
+            (skill_dir / "SKILL.md").write_text(f"# {skill}")
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "swift",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                created = sync_upstream(upstream, str(plugins_output_dir))
+
+        assert "swift--swift-core-skills" in created
+        dest = plugins_output_dir / "swift--swift-core-skills"
+        # Declared skills are present
+        assert (dest / "skills" / "swift-lang" / "SKILL.md").exists()
+        assert (dest / "skills" / "swift-testing" / "SKILL.md").exists()
+        # Undeclared skills are removed
+        assert not (dest / "skills" / "swiftui-animation").exists()
+        assert not (dest / "skills" / "other").exists()
+
+    def test_marketplace_plugin_filter_applies(self, tmp_path):
+        """User plugin include/exclude filter works with marketplace discovery."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {"name": "plugin-a", "source": "./plugins/plugin-a"},
+            {"name": "plugin-b", "source": "./plugins/plugin-b"},
+        ])
+
+        for name in ["plugin-a", "plugin-b"]:
+            (clone_dir / "plugins" / name).mkdir(parents=True)
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "up",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+            "plugins": {"include": ["plugin-a"]},
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                created = sync_upstream(upstream, str(plugins_output_dir))
+
+        assert "up--plugin-a" in created
+        assert "up--plugin-b" not in created
+
+    def test_user_skill_filter_composes_with_marketplace_skills(self, tmp_path):
+        """User skill exclude filter removes skills from marketplace set."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {
+                "name": "my-plugin",
+                "source": "./",
+                "skills": ["./skills/a", "./skills/b", "./skills/c"],
+            },
+        ])
+
+        skills_dir = clone_dir / "skills"
+        skills_dir.mkdir()
+        for skill in ["a", "b", "c", "d"]:
+            (skills_dir / skill).mkdir()
+            (skills_dir / skill / "SKILL.md").write_text(f"# {skill}")
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "up",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+            "plugins": {
+                "include": [{"my-plugin": {"skills": {"exclude": ["b"]}}}]
+            },
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                created = sync_upstream(upstream, str(plugins_output_dir))
+
+        dest = plugins_output_dir / "up--my-plugin"
+        assert "up--my-plugin" in created
+        # 'a' and 'c' are in marketplace AND not excluded
+        assert (dest / "skills" / "a").exists()
+        assert (dest / "skills" / "c").exists()
+        # 'b' is in marketplace but user excluded it
+        assert not (dest / "skills" / "b").exists()
+        # 'd' is NOT in marketplace so it's excluded too
+        assert not (dest / "skills" / "d").exists()
+
+    def test_git_directory_not_copied(self, tmp_path):
+        """The .git directory is excluded when copying from repo root."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {"name": "root-plugin", "source": "./"},
+        ])
+
+        # Simulate a .git directory
+        (clone_dir / ".git").mkdir()
+        (clone_dir / ".git" / "HEAD").write_text("ref: refs/heads/main")
+        (clone_dir / "skills").mkdir()
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "up",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                sync_upstream(upstream, str(plugins_output_dir))
+
+        dest = plugins_output_dir / "up--root-plugin"
+        assert dest.exists()
+        assert not (dest / ".git").exists()
 
 
 class TestGenerateMarketplace:

@@ -163,6 +163,97 @@ def should_include_skill(
     return should_include(skill_name, filter_type, filter_set)
 
 
+def read_upstream_marketplace(clone_dir: str) -> Optional[dict]:
+    """Read marketplace.json from a cloned upstream repository.
+
+    Args:
+        clone_dir: Path to cloned repository
+
+    Returns:
+        Parsed marketplace.json dict, or None if not found
+    """
+    marketplace_path = Path(clone_dir) / ".claude-plugin" / "marketplace.json"
+    if not marketplace_path.exists():
+        return None
+    with open(marketplace_path, "r") as f:
+        return json.load(f)
+
+
+def extract_marketplace_skills(plugin_entry: dict) -> Optional[Set[str]]:
+    """Extract skill directory names from a marketplace plugin entry.
+
+    Marketplace entries may have a 'skills' array with paths like
+    './skills/codable-patterns'. This extracts just the directory names.
+
+    Args:
+        plugin_entry: A single plugin entry from marketplace.json
+
+    Returns:
+        Set of skill directory names, or None if no skills key
+    """
+    skills = plugin_entry.get("skills")
+    if not skills:
+        return None
+    return {Path(skill_path).name for skill_path in skills}
+
+
+def compute_effective_skill_filter(
+    marketplace_skills: Optional[Set[str]],
+    user_filter_type: str,
+    user_filter_set: Optional[Set[str]],
+) -> Tuple[str, Optional[Set[str]]]:
+    """Compose marketplace-declared skills with user-configured skill filter.
+
+    When a marketplace entry declares specific skills, those act as a base
+    include set. The user's filter is then applied on top.
+
+    Args:
+        marketplace_skills: Skills declared in marketplace entry (None = no restriction)
+        user_filter_type: User's skill filter type ("all", "include", "exclude")
+        user_filter_set: User's skill filter set
+
+    Returns:
+        Tuple of (effective_filter_type, effective_filter_set)
+    """
+    if marketplace_skills is None:
+        return user_filter_type, user_filter_set
+
+    allowed = set(marketplace_skills)
+
+    if user_filter_type == "include":
+        allowed = allowed & user_filter_set
+    elif user_filter_type == "exclude":
+        allowed = allowed - user_filter_set
+
+    return "include", allowed
+
+
+def _get_user_skill_filter(
+    upstream: dict, plugin_name: str, plugin_filter_type: str
+) -> Tuple[str, Optional[Set[str]]]:
+    """Look up user-configured skill filter for a specific plugin.
+
+    Args:
+        upstream: Upstream configuration dictionary
+        plugin_name: Name of the plugin to look up
+        plugin_filter_type: The plugin-level filter type
+
+    Returns:
+        Tuple of (filter_type, filter_set)
+    """
+    if plugin_filter_type != "include":
+        return "all", None
+    include_list = upstream.get("plugins", {}).get("include", [])
+    for entry in include_list:
+        if isinstance(entry, str) and entry == plugin_name:
+            return "all", None
+        elif isinstance(entry, dict):
+            parsed_name, skill_type, skill_set = parse_skill_filter(entry)
+            if parsed_name == plugin_name:
+                return skill_type, skill_set
+    return "all", None
+
+
 def clone_upstream(repo_url: str, ref: str, dest: str) -> None:
     """Clone an upstream repository to a destination.
 
@@ -195,7 +286,9 @@ def copy_plugin(
         skill_filter_type: "all", "include", or "exclude"
         skill_filter_set: Set of skill names to filter (None if filter_type is "all")
     """
-    shutil.copytree(src_plugin_dir, dest_plugin_dir)
+    shutil.copytree(
+        src_plugin_dir, dest_plugin_dir, ignore=shutil.ignore_patterns(".git")
+    )
 
     # Apply skill-level filtering if needed
     if skill_filter_type != "all":
@@ -212,6 +305,9 @@ def copy_plugin(
 
 def sync_upstream(upstream: dict, plugins_dir: str) -> list:
     """Sync a single upstream repository.
+
+    Discovers plugins by reading the upstream's .claude-plugin/marketplace.json.
+    Falls back to scanning a plugins/ directory if no marketplace.json exists.
 
     Args:
         upstream: Upstream configuration dictionary
@@ -231,66 +327,122 @@ def sync_upstream(upstream: dict, plugins_dir: str) -> list:
             logger.error("Failed to clone upstream %s: %s", upstream['name'], e)
             return []
 
-        # Check for plugins directory
-        src_plugins_dir = Path(temp_dir) / "plugins"
-        if not src_plugins_dir.exists():
-            logger.warning(
-                "Upstream %s has no plugins/ directory, skipping", upstream['name']
-            )
-            return []
+        # Try marketplace-based discovery first
+        marketplace = read_upstream_marketplace(temp_dir)
+        if marketplace:
+            return _sync_from_marketplace(upstream, temp_dir, plugins_dir, marketplace)
 
-        # Parse plugin filter
-        plugin_filter_type, plugin_filter_set = parse_plugin_filter(upstream)
-
-        created_plugins = []
-        plugins_dir_path = Path(plugins_dir)
-
-        # Process each plugin in the upstream
-        for plugin_dir in src_plugins_dir.iterdir():
-            if not plugin_dir.is_dir():
-                continue
-
-            plugin_name = plugin_dir.name
-
-            # Check if plugin should be included
-            if not should_include_plugin(plugin_name, plugin_filter_type, plugin_filter_set):
-                continue
-
-            # Parse skill filter for this plugin if in include list
-            skill_filter_type = "all"
-            skill_filter_set = None
-
-            if plugin_filter_type == "include":
-                # Find the plugin entry in the include list
-                include_list = upstream.get("plugins", {}).get("include", [])
-                for entry in include_list:
-                    if isinstance(entry, str) and entry == plugin_name:
-                        skill_filter_type = "all"
-                        skill_filter_set = None
-                        break
-                    elif isinstance(entry, dict):
-                        parsed_name, skill_type, skill_set = parse_skill_filter(entry)
-                        if parsed_name == plugin_name:
-                            skill_filter_type = skill_type
-                            skill_filter_set = skill_set
-                            break
-
-            # Create namespaced plugin name
-            namespaced_name = f"{upstream['name']}--{plugin_name}"
-            dest_plugin_dir = str(plugins_dir_path / namespaced_name)
-
-            # Copy plugin with filtering
-            copy_plugin(
-                str(plugin_dir), dest_plugin_dir, skill_filter_type, skill_filter_set
-            )
-
-            created_plugins.append(namespaced_name)
-
-        return created_plugins
+        # Fall back to scanning plugins/ directory
+        return _sync_from_plugins_dir(upstream, temp_dir, plugins_dir)
 
     finally:
         if temp_dir and Path(temp_dir).exists():
             shutil.rmtree(temp_dir)
+
+
+def _sync_from_marketplace(
+    upstream: dict, clone_dir: str, plugins_dir: str, marketplace: dict
+) -> list:
+    """Sync plugins discovered via upstream marketplace.json.
+
+    Args:
+        upstream: Upstream configuration dictionary
+        clone_dir: Path to cloned repository
+        plugins_dir: Destination plugins directory
+        marketplace: Parsed marketplace.json
+
+    Returns:
+        List of created plugin names (with namespace prefix)
+    """
+    plugin_filter_type, plugin_filter_set = parse_plugin_filter(upstream)
+    created_plugins = []
+    plugins_dir_path = Path(plugins_dir)
+
+    for mp_entry in marketplace.get("plugins", []):
+        plugin_name = mp_entry["name"]
+
+        if not should_include(plugin_name, plugin_filter_type, plugin_filter_set):
+            continue
+
+        # Resolve source path relative to clone dir
+        source = mp_entry.get("source", "./")
+        if source in ("./", "."):
+            source_path = Path(clone_dir)
+        else:
+            source_path = Path(clone_dir) / source.removeprefix("./")
+
+        if not source_path.exists():
+            logger.warning(
+                "Plugin %s source path %s not found, skipping",
+                plugin_name,
+                source,
+            )
+            continue
+
+        # Get marketplace-declared skills and user skill filter, then compose
+        marketplace_skills = extract_marketplace_skills(mp_entry)
+        user_skill_type, user_skill_set = _get_user_skill_filter(
+            upstream, plugin_name, plugin_filter_type
+        )
+        eff_type, eff_set = compute_effective_skill_filter(
+            marketplace_skills, user_skill_type, user_skill_set
+        )
+
+        # Copy plugin with effective skill filter
+        namespaced_name = f"{upstream['name']}--{plugin_name}"
+        dest_plugin_dir = str(plugins_dir_path / namespaced_name)
+        copy_plugin(str(source_path), dest_plugin_dir, eff_type, eff_set)
+        created_plugins.append(namespaced_name)
+
+    return created_plugins
+
+
+def _sync_from_plugins_dir(
+    upstream: dict, clone_dir: str, plugins_dir: str
+) -> list:
+    """Sync plugins by scanning the plugins/ directory (fallback).
+
+    Used when the upstream repo has no .claude-plugin/marketplace.json.
+
+    Args:
+        upstream: Upstream configuration dictionary
+        clone_dir: Path to cloned repository
+        plugins_dir: Destination plugins directory
+
+    Returns:
+        List of created plugin names (with namespace prefix)
+    """
+    src_plugins_dir = Path(clone_dir) / "plugins"
+    if not src_plugins_dir.exists():
+        logger.warning(
+            "Upstream %s has no marketplace.json or plugins/ directory, skipping",
+            upstream['name'],
+        )
+        return []
+
+    plugin_filter_type, plugin_filter_set = parse_plugin_filter(upstream)
+    created_plugins = []
+    plugins_dir_path = Path(plugins_dir)
+
+    for plugin_dir in src_plugins_dir.iterdir():
+        if not plugin_dir.is_dir():
+            continue
+
+        plugin_name = plugin_dir.name
+
+        if not should_include(plugin_name, plugin_filter_type, plugin_filter_set):
+            continue
+
+        user_skill_type, user_skill_set = _get_user_skill_filter(
+            upstream, plugin_name, plugin_filter_type
+        )
+
+        namespaced_name = f"{upstream['name']}--{plugin_name}"
+        dest_plugin_dir = str(plugins_dir_path / namespaced_name)
+        copy_plugin(str(plugin_dir), dest_plugin_dir, user_skill_type, user_skill_set)
+        created_plugins.append(namespaced_name)
+
+    return created_plugins
 
 
 def sync_all(config_path: str = "upstream.yaml", plugins_dir: str = "plugins") -> list:
