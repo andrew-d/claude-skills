@@ -3,11 +3,9 @@
 import json
 import shutil
 import subprocess
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-import yaml
 from sync import (
     clone_upstream,
     copy_plugin,
@@ -308,7 +306,7 @@ class TestSyncUpstream:
             "ref": "main",
         }
 
-        with patch("sync.clone_upstream") as mock_clone:
+        with patch("sync.clone_upstream"):
             with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
                 created = sync_upstream(upstream, str(plugins_output_dir))
 
@@ -698,7 +696,7 @@ upstreams:
 
         with patch("sync.clone_upstream"):
             with patch("sync.tempfile.mkdtemp", side_effect=mock_mkdtemp):
-                created = sync_all(str(config_file), str(plugins_dir))
+                sync_all(str(config_file), str(plugins_dir))
 
                 # Old plugin should be gone
                 assert not (plugins_dir / "old-plugin").exists()

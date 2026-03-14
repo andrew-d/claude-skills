@@ -228,14 +228,14 @@ def sync_upstream(upstream: dict, plugins_dir: str) -> list:
         try:
             clone_upstream(upstream["repo"], upstream["ref"], temp_dir)
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to clone upstream {upstream['name']}: {e}")
+            logger.error("Failed to clone upstream %s: %s", upstream['name'], e)
             return []
 
         # Check for plugins directory
         src_plugins_dir = Path(temp_dir) / "plugins"
         if not src_plugins_dir.exists():
             logger.warning(
-                f"Upstream {upstream['name']} has no plugins/ directory, skipping"
+                "Upstream %s has no plugins/ directory, skipping", upstream['name']
             )
             return []
 
@@ -386,7 +386,7 @@ def main(
         marketplace_output_path: Path for marketplace.json output (default: ".claude-plugin/marketplace.json")
     """
     created_plugins = sync_all(config_path, plugins_dir)
-    logger.info(f"Created {len(created_plugins)} plugins")
+    logger.info("Created %s plugins", len(created_plugins))
 
     # Generate marketplace
     generate_marketplace(plugins_dir, marketplace_output_path)
