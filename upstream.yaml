@@ -2,3 +2,15 @@ upstreams:
   - name: trailofbits
     repo: https://github.com/trailofbits/skills
     ref: main
+    plugins:
+      include:
+        - ask-questions-if-underspecified
+        - gh-cli
+        - modern-python
+        - supply-chain-risk-auditor
+  - name: swift-ios-skills
+    repo: https://github.com/dpearson2699/swift-ios-skills
+    ref: main
+    plugins:
+      include:
+        - swift-core-skills
