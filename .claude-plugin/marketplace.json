@@ -9,6 +9,35 @@
   },
   "plugins": [
     {
+      "name": "learning-opportunities--learning-opportunities",
+      "version": "1.0.0",
+      "description": "Science-based learning exercises for deliberate skill development during AI-assisted coding",
+      "author": {
+        "name": "Dr. Cat Hicks",
+        "url": "https://drcathicks.com"
+      },
+      "source": "./plugins/learning-opportunities--learning-opportunities"
+    },
+    {
+      "name": "learning-opportunities--learning-opportunities-auto",
+      "version": "1.0.1",
+      "description": "Automatically nudges Claude to offer learning exercises after git commits. Requires the learning-opportunities plugin.",
+      "author": {
+        "name": "Dr. Cat Hicks",
+        "url": "https://drcathicks.com"
+      },
+      "source": "./plugins/learning-opportunities--learning-opportunities-auto"
+    },
+    {
+      "name": "learning-opportunities--orient",
+      "version": "1.0.0",
+      "description": "Generates a repo-specific orientation.md for use with the learning-opportunities skill",
+      "author": {
+        "name": "Dr. Michael Mullarkey"
+      },
+      "source": "./plugins/learning-opportunities--orient"
+    },
+    {
       "name": "trailofbits--ask-questions-if-underspecified",
       "version": "1.0.1",
       "description": "Clarify ambiguous requirements by asking questions before implementing. Only when invoked explicitly.",
