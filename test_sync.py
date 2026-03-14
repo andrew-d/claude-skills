@@ -672,6 +672,79 @@ class TestSyncUpstreamWithMarketplace:
         # 'd' is NOT in marketplace so it's excluded too
         assert not (dest / "skills" / "d").exists()
 
+    def test_creates_plugin_json_when_missing(self, tmp_path):
+        """For shared-root repos without plugin.json, one is created from marketplace metadata."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {
+                "name": "my-plugin",
+                "source": "./",
+                "version": "2.0.0",
+                "description": "A great plugin",
+                "author": {"name": "Alice"},
+            },
+        ])
+        (clone_dir / "skills").mkdir()
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "up",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                sync_upstream(upstream, str(plugins_output_dir))
+
+        plugin_json_path = (
+            plugins_output_dir / "up--my-plugin" / ".claude-plugin" / "plugin.json"
+        )
+        assert plugin_json_path.exists()
+        with open(plugin_json_path) as f:
+            data = json.load(f)
+        assert data["name"] == "my-plugin"
+        assert data["version"] == "2.0.0"
+        assert data["description"] == "A great plugin"
+        assert data["author"]["name"] == "Alice"
+
+    def test_does_not_overwrite_existing_plugin_json(self, tmp_path):
+        """If plugin.json already exists in source, it is not overwritten."""
+        clone_dir = self._create_marketplace_upstream(tmp_path, [
+            {"name": "plugin-a", "source": "./plugins/plugin-a", "version": "9.9.9"},
+        ])
+
+        plugin_dir = clone_dir / "plugins" / "plugin-a"
+        plugin_dir.mkdir(parents=True)
+        claude_dir = plugin_dir / ".claude-plugin"
+        claude_dir.mkdir()
+        (claude_dir / "plugin.json").write_text(
+            json.dumps({"name": "plugin-a", "version": "1.0.0", "description": "Original"})
+        )
+
+        plugins_output_dir = tmp_path / "plugins"
+        plugins_output_dir.mkdir()
+
+        upstream = {
+            "name": "up",
+            "repo": "https://github.com/test/repo",
+            "ref": "main",
+        }
+
+        with patch("sync.clone_upstream"):
+            with patch("sync.tempfile.mkdtemp", return_value=str(clone_dir)):
+                sync_upstream(upstream, str(plugins_output_dir))
+
+        plugin_json_path = (
+            plugins_output_dir / "up--plugin-a" / ".claude-plugin" / "plugin.json"
+        )
+        with open(plugin_json_path) as f:
+            data = json.load(f)
+        # Original plugin.json is preserved, not overwritten with marketplace version
+        assert data["version"] == "1.0.0"
+        assert data["description"] == "Original"
+
     def test_git_directory_not_copied(self, tmp_path):
         """The .git directory is excluded when copying from repo root."""
         clone_dir = self._create_marketplace_upstream(tmp_path, [

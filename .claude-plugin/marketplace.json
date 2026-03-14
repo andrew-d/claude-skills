@@ -38,6 +38,13 @@
       "source": "./plugins/learning-opportunities--orient"
     },
     {
+      "name": "swift-ios-skills--swift-core-skills",
+      "version": "2.0.0",
+      "description": "Core Swift language features, concurrency, testing, SwiftData, Charts, and Codable",
+      "author": {},
+      "source": "./plugins/swift-ios-skills--swift-core-skills"
+    },
+    {
       "name": "trailofbits--ask-questions-if-underspecified",
       "version": "1.0.1",
       "description": "Clarify ambiguous requirements by asking questions before implementing. Only when invoked explicitly.",

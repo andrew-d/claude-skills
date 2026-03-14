@@ -392,6 +392,21 @@ def _sync_from_marketplace(
         namespaced_name = f"{upstream['name']}--{plugin_name}"
         dest_plugin_dir = str(plugins_dir_path / namespaced_name)
         copy_plugin(str(source_path), dest_plugin_dir, eff_type, eff_set)
+
+        # Ensure .claude-plugin/plugin.json exists for marketplace generation.
+        # Shared-root repos may only have marketplace.json, not plugin.json.
+        dest_plugin_json = Path(dest_plugin_dir) / ".claude-plugin" / "plugin.json"
+        if not dest_plugin_json.exists():
+            dest_plugin_json.parent.mkdir(parents=True, exist_ok=True)
+            plugin_meta = {
+                "name": plugin_name,
+                "version": mp_entry.get("version", "0.0.0"),
+                "description": mp_entry.get("description", ""),
+                "author": mp_entry.get("author", {}),
+            }
+            with open(dest_plugin_json, "w") as f:
+                json.dump(plugin_meta, f, indent=2)
+
         created_plugins.append(namespaced_name)
 
     return created_plugins
