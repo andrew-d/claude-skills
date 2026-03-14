@@ -11,19 +11,23 @@ This project mirrors Claude Code skill plugins from upstream Git repositories in
 ## Key Files
 
 - `sync.py` -- Main sync script. Entry point: `main()` at bottom. Core pipeline: load_config -> sync_all -> generate_marketplace.
-- `test_sync.py` -- 33 pytest tests covering config parsing, filtering, cloning, copying, and marketplace generation.
+- `test_sync.py` -- pytest tests covering config parsing, filtering, cloning, copying, marketplace discovery, and marketplace generation.
 - `upstream.yaml` -- Declares upstream repos to sync (name, repo URL, ref, optional plugin/skill filters).
 - `.github/workflows/sync.yaml` -- Weekly GitHub Actions workflow (Monday 9am UTC) that runs sync and opens a PR.
 
 ## Contracts
 
 - **Namespace convention**: Synced plugins are placed at `plugins/{upstream_name}--{plugin_name}/`.
+- **Plugin discovery**: Plugins are discovered by reading the upstream's `.claude-plugin/marketplace.json`. Falls back to scanning `plugins/` directory if no marketplace.json exists.
+- **Shared-root upstreams**: When an upstream's marketplace.json declares `source: "./"`, only the skills listed in each plugin entry's `skills` array are copied. This supports repos where multiple virtual plugins share a single `skills/` directory.
+- **Skill filter composition**: Marketplace-declared skills act as a base include set. User-configured skill filters (include/exclude) are applied on top.
 - **Filter mutual exclusivity**: Plugin-level and skill-level configs cannot have both `include` and `exclude` -- raises `ValueError`.
 - **Filter types**: Three filter modes: `"all"` (no filter), `"include"` (allowlist), `"exclude"` (denylist). Returned as `(filter_type, filter_set)` tuples.
 - **sync_all wipes plugins/**: Each run deletes and recreates the `plugins/` directory. Not incremental.
 - **marketplace.json schema**: Top-level keys: `name` ("claude-skills-mirror"), `owner`, `metadata`, `plugins` (sorted by name). Each plugin entry has: `name`, `version`, `description`, `author`, `source`.
 - **Shallow clone**: Upstream repos are cloned with `--depth 1`.
 - **Temp directory cleanup**: `sync_upstream` uses a `finally` block to clean up temp clone directories.
+- **.git excluded**: `.git` directories are excluded during plugin copying to avoid bloating the output.
 
 ## upstream.yaml Schema
 
@@ -42,10 +46,11 @@ upstreams:
 
 ## Invariants
 
-- The `plugins/` directory and `.claude-plugin/marketplace.json` are generated artifacts -- do not commit manually.
+- The `plugins/` directory and `.claude-plugin/marketplace.json` are generated artifacts committed to `main`. They are the product of the repo -- consumers point Claude Code at this repo to install plugins. The GitHub Action syncs upstream changes and opens PRs so a human can review the diff before merging.
+- Do not edit `plugins/` or `.claude-plugin/marketplace.json` manually -- they are overwritten on every sync run.
 - `.tmp-upstream-*` directories are transient (in `.gitignore`).
 - Clone failures are logged and skipped (do not abort the entire sync).
-- Upstream repos missing a `plugins/` directory are warned and skipped.
+- Upstream repos missing both marketplace.json and a `plugins/` directory are warned and skipped.
 
 ## Python Package Management with uv
 
