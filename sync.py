@@ -398,11 +398,13 @@ def _sync_from_marketplace(
         dest_plugin_json = Path(dest_plugin_dir) / ".claude-plugin" / "plugin.json"
         if not dest_plugin_json.exists():
             dest_plugin_json.parent.mkdir(parents=True, exist_ok=True)
+            # Fall back to marketplace owner if plugin has no author
+            author = mp_entry.get("author") or marketplace.get("owner", {})
             plugin_meta = {
                 "name": plugin_name,
                 "version": mp_entry.get("version", "0.0.0"),
                 "description": mp_entry.get("description", ""),
-                "author": mp_entry.get("author", {}),
+                "author": author,
             }
             with open(dest_plugin_json, "w") as f:
                 json.dump(plugin_meta, f, indent=2)
@@ -509,13 +511,16 @@ def generate_marketplace(plugins_dir: str, output_path: str) -> None:
         with open(plugin_json_path, "r") as f:
             plugin_json = json.load(f)
 
+        author = plugin_json.get("author", {})
         plugin_entry = {
             "name": plugin_dir.name,
             "version": plugin_json.get("version"),
             "description": plugin_json.get("description"),
-            "author": plugin_json.get("author", {}),
             "source": f"./{plugins_dir_basename}/{plugin_dir.name}",
         }
+        # Only include author if it has a name (schema requires author.name)
+        if author.get("name"):
+            plugin_entry["author"] = author
 
         plugins_data.append(plugin_entry)
 

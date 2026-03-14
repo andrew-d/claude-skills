@@ -12,79 +12,81 @@
       "name": "learning-opportunities--learning-opportunities",
       "version": "1.0.0",
       "description": "Science-based learning exercises for deliberate skill development during AI-assisted coding",
+      "source": "./plugins/learning-opportunities--learning-opportunities",
       "author": {
         "name": "Dr. Cat Hicks",
         "url": "https://drcathicks.com"
-      },
-      "source": "./plugins/learning-opportunities--learning-opportunities"
+      }
     },
     {
       "name": "learning-opportunities--learning-opportunities-auto",
       "version": "1.0.1",
       "description": "Automatically nudges Claude to offer learning exercises after git commits. Requires the learning-opportunities plugin.",
+      "source": "./plugins/learning-opportunities--learning-opportunities-auto",
       "author": {
         "name": "Dr. Cat Hicks",
         "url": "https://drcathicks.com"
-      },
-      "source": "./plugins/learning-opportunities--learning-opportunities-auto"
+      }
     },
     {
       "name": "learning-opportunities--orient",
       "version": "1.0.0",
       "description": "Generates a repo-specific orientation.md for use with the learning-opportunities skill",
+      "source": "./plugins/learning-opportunities--orient",
       "author": {
         "name": "Dr. Michael Mullarkey"
-      },
-      "source": "./plugins/learning-opportunities--orient"
+      }
     },
     {
       "name": "swift-ios-skills--swift-core-skills",
       "version": "2.0.0",
       "description": "Core Swift language features, concurrency, testing, SwiftData, Charts, and Codable",
-      "author": {},
-      "source": "./plugins/swift-ios-skills--swift-core-skills"
+      "source": "./plugins/swift-ios-skills--swift-core-skills",
+      "author": {
+        "name": "Derek Pearson"
+      }
     },
     {
       "name": "trailofbits--ask-questions-if-underspecified",
       "version": "1.0.1",
       "description": "Clarify ambiguous requirements by asking questions before implementing. Only when invoked explicitly.",
+      "source": "./plugins/trailofbits--ask-questions-if-underspecified",
       "author": {
         "name": "Kevin Valerio",
         "email": "opensource@trailofbits.com",
         "url": "https://github.com/trailofbits"
-      },
-      "source": "./plugins/trailofbits--ask-questions-if-underspecified"
+      }
     },
     {
       "name": "trailofbits--gh-cli",
       "version": "1.4.0",
       "description": "Intercepts GitHub URL fetches and curl/wget commands, redirecting to the authenticated gh CLI.",
+      "source": "./plugins/trailofbits--gh-cli",
       "author": {
         "name": "William Tan",
         "email": "opensource@trailofbits.com",
         "url": "https://github.com/trailofbits"
-      },
-      "source": "./plugins/trailofbits--gh-cli"
+      }
     },
     {
       "name": "trailofbits--modern-python",
       "version": "1.5.0",
       "description": "Modern Python best practices. Use when creating new Python projects, and writing Python scripts, or migrating existing projects from legacy tools.",
+      "source": "./plugins/trailofbits--modern-python",
       "author": {
         "name": "William Tan",
         "email": "opensource@trailofbits.com",
         "url": "https://github.com/trailofbits"
-      },
-      "source": "./plugins/trailofbits--modern-python"
+      }
     },
     {
       "name": "trailofbits--supply-chain-risk-auditor",
       "version": "1.0.0",
       "description": "Audit supply-chain threat landscape of project dependencies for exploitation or takeover risk",
+      "source": "./plugins/trailofbits--supply-chain-risk-auditor",
       "author": {
         "name": "Spencer Michaels"
-      },
-      "source": "./plugins/trailofbits--supply-chain-risk-auditor"
+      }
     }
   ]
 }
