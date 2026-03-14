@@ -1,0 +1,223 @@
+{
+  "name": "swift-ios-skills",
+  "owner": {
+    "name": "Derek Pearson"
+  },
+  "metadata": {
+    "description": "iOS and Swift development skills for Claude Code",
+    "version": "2.0.0"
+  },
+  "plugins": [
+    {
+      "name": "swiftui-skills",
+      "source": "./",
+      "description": "SwiftUI patterns, navigation, gestures, layout, animation, Liquid Glass, performance, and UIKit interop",
+      "version": "2.0.0",
+      "keywords": ["swiftui", "ios", "swift", "ui", "liquid-glass", "animation", "navigation", "gestures", "layout", "uikit"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/swiftui-animation",
+        "./skills/swiftui-gestures",
+        "./skills/swiftui-layout-components",
+        "./skills/swiftui-liquid-glass",
+        "./skills/swiftui-navigation",
+        "./skills/swiftui-patterns",
+        "./skills/swiftui-performance",
+        "./skills/swiftui-uikit-interop"
+      ]
+    },
+    {
+      "name": "swift-core-skills",
+      "source": "./",
+      "description": "Core Swift language features, concurrency, testing, SwiftData, Charts, and Codable",
+      "version": "2.0.0",
+      "keywords": ["swift", "concurrency", "testing", "swiftdata", "charts", "codable", "macros", "sendable", "async-await"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/codable-patterns",
+        "./skills/swift-charts",
+        "./skills/swift-concurrency",
+        "./skills/swift-language",
+        "./skills/swift-testing",
+        "./skills/swiftdata"
+      ]
+    },
+    {
+      "name": "ios-app-framework-skills",
+      "source": "./",
+      "description": "App experience frameworks: widgets, Live Activities, App Intents, StoreKit, push notifications, maps, media",
+      "version": "2.0.0",
+      "keywords": ["ios", "widgetkit", "storekit", "mapkit", "app-intents", "tipkit", "alarmkit", "live-activities", "push-notifications", "app-clips", "photos"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/alarmkit",
+        "./skills/app-clips",
+        "./skills/app-intents",
+        "./skills/live-activities",
+        "./skills/mapkit-location",
+        "./skills/photos-camera-media",
+        "./skills/push-notifications",
+        "./skills/storekit",
+        "./skills/tipkit",
+        "./skills/widgetkit"
+      ]
+    },
+    {
+      "name": "ios-data-framework-skills",
+      "source": "./",
+      "description": "Data and service frameworks: CloudKit, HealthKit, EventKit, Contacts, MusicKit, PassKit, WeatherKit",
+      "version": "2.0.0",
+      "keywords": ["ios", "cloudkit", "healthkit", "eventkit", "contacts", "musickit", "passkit", "weatherkit", "sync", "data"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/cloudkit-sync",
+        "./skills/contacts-framework",
+        "./skills/eventkit-calendar",
+        "./skills/healthkit",
+        "./skills/musickit-audio",
+        "./skills/passkit-wallet",
+        "./skills/weatherkit"
+      ]
+    },
+    {
+      "name": "ios-ai-ml-skills",
+      "source": "./",
+      "description": "AI and machine learning: Foundation Models, Core ML, Vision, NaturalLanguage, Speech Recognition",
+      "version": "2.0.0",
+      "keywords": ["ios", "ai", "ml", "coreml", "vision", "foundation-models", "natural-language", "speech", "machine-learning", "on-device-ai"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/apple-on-device-ai",
+        "./skills/coreml",
+        "./skills/natural-language",
+        "./skills/speech-recognition",
+        "./skills/vision-framework"
+      ]
+    },
+    {
+      "name": "ios-engineering-skills",
+      "source": "./",
+      "description": "iOS engineering: networking, security, auth, accessibility, localization, debugging, diagnostics, App Store review",
+      "version": "2.0.0",
+      "keywords": ["ios", "networking", "security", "authentication", "accessibility", "localization", "debugging", "instruments", "metrickit", "app-store"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/app-store-review",
+        "./skills/authentication",
+        "./skills/background-processing",
+        "./skills/debugging-instruments",
+        "./skills/device-integrity",
+        "./skills/ios-accessibility",
+        "./skills/ios-localization",
+        "./skills/ios-networking",
+        "./skills/ios-security",
+        "./skills/metrickit-diagnostics"
+      ]
+    },
+    {
+      "name": "ios-hardware-skills",
+      "source": "./",
+      "description": "Hardware and device integration: Bluetooth, NFC, motion sensors, Apple Pencil, AR/RealityKit",
+      "version": "2.0.0",
+      "keywords": ["ios", "bluetooth", "nfc", "coremotion", "pencilkit", "arkit", "realitykit", "ble", "hardware", "sensors"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/core-bluetooth",
+        "./skills/core-motion",
+        "./skills/core-nfc",
+        "./skills/pencilkit-drawing",
+        "./skills/realitykit-ar"
+      ]
+    },
+    {
+      "name": "ios-platform-skills",
+      "source": "./",
+      "description": "Specialized platform integrations: HomeKit/Matter, SharePlay, CallKit/VoIP, PermissionKit, EnergyKit",
+      "version": "2.0.0",
+      "keywords": ["ios", "homekit", "matter", "shareplay", "callkit", "voip", "permissionkit", "energykit", "smart-home", "group-activities"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/callkit-voip",
+        "./skills/energykit",
+        "./skills/homekit-matter",
+        "./skills/permissionkit",
+        "./skills/shareplay-activities"
+      ]
+    },
+    {
+      "name": "all-ios-skills",
+      "source": "./",
+      "description": "All 56 iOS and Swift development skills in one plugin",
+      "version": "2.0.0",
+      "keywords": ["swift", "ios", "swiftui", "complete"],
+      "category": "development",
+      "strict": false,
+      "skills": [
+        "./skills/alarmkit",
+        "./skills/app-clips",
+        "./skills/app-intents",
+        "./skills/app-store-review",
+        "./skills/apple-on-device-ai",
+        "./skills/authentication",
+        "./skills/background-processing",
+        "./skills/callkit-voip",
+        "./skills/cloudkit-sync",
+        "./skills/codable-patterns",
+        "./skills/contacts-framework",
+        "./skills/core-bluetooth",
+        "./skills/core-motion",
+        "./skills/core-nfc",
+        "./skills/coreml",
+        "./skills/debugging-instruments",
+        "./skills/device-integrity",
+        "./skills/energykit",
+        "./skills/eventkit-calendar",
+        "./skills/healthkit",
+        "./skills/homekit-matter",
+        "./skills/ios-accessibility",
+        "./skills/ios-localization",
+        "./skills/ios-networking",
+        "./skills/ios-security",
+        "./skills/live-activities",
+        "./skills/mapkit-location",
+        "./skills/metrickit-diagnostics",
+        "./skills/musickit-audio",
+        "./skills/natural-language",
+        "./skills/passkit-wallet",
+        "./skills/pencilkit-drawing",
+        "./skills/permissionkit",
+        "./skills/photos-camera-media",
+        "./skills/push-notifications",
+        "./skills/realitykit-ar",
+        "./skills/shareplay-activities",
+        "./skills/speech-recognition",
+        "./skills/storekit",
+        "./skills/swift-charts",
+        "./skills/swift-concurrency",
+        "./skills/swift-language",
+        "./skills/swift-testing",
+        "./skills/swiftdata",
+        "./skills/swiftui-animation",
+        "./skills/swiftui-gestures",
+        "./skills/swiftui-layout-components",
+        "./skills/swiftui-liquid-glass",
+        "./skills/swiftui-navigation",
+        "./skills/swiftui-patterns",
+        "./skills/swiftui-performance",
+        "./skills/swiftui-uikit-interop",
+        "./skills/tipkit",
+        "./skills/vision-framework",
+        "./skills/weatherkit",
+        "./skills/widgetkit"
+      ]
+    }
+  ]
+}

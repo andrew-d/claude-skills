@@ -1,0 +1,8 @@
+{
+  "name": "swiftui-skills",
+  "version": "2.0.0",
+  "description": "SwiftUI patterns, navigation, gestures, layout, animation, Liquid Glass, performance, and UIKit interop",
+  "author": {
+    "name": "Derek Pearson"
+  }
+}

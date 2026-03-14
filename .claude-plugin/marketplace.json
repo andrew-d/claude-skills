@@ -47,6 +47,15 @@
       }
     },
     {
+      "name": "swift-ios-skills--swiftui-skills",
+      "version": "2.0.0",
+      "description": "SwiftUI patterns, navigation, gestures, layout, animation, Liquid Glass, performance, and UIKit interop",
+      "source": "./plugins/swift-ios-skills--swiftui-skills",
+      "author": {
+        "name": "Derek Pearson"
+      }
+    },
+    {
       "name": "trailofbits--ask-questions-if-underspecified",
       "version": "1.0.1",
       "description": "Clarify ambiguous requirements by asking questions before implementing. Only when invoked explicitly.",
