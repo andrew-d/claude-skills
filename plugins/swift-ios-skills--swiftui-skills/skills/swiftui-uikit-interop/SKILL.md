@@ -1,13 +1,13 @@
 ---
 name: swiftui-uikit-interop
-description: "Bridge UIKit and SwiftUI — wrap UIKit views/view controllers in SwiftUI using UIViewRepresentable/UIViewControllerRepresentable, embed SwiftUI in UIKit with UIHostingController, and handle the Coordinator delegate pattern. Use when integrating camera previews, map views, web views, mail compose, document scanners, PDF renderers, text views with attributed text, or any third-party UIKit SDK into a SwiftUI app. Also use when migrating a UIKit app to SwiftUI incrementally, or when needing UIKit features not yet available in native SwiftUI."
+description: "Bridges UIKit and SwiftUI by wrapping UIKit views and view controllers in SwiftUI with UIViewRepresentable and UIViewControllerRepresentable, embedding SwiftUI in UIKit with UIHostingController, and coordinating delegate callbacks. Use when integrating camera previews, map views, mail compose, document scanners, PDF renderers, text views with attributed text, or other UIKit-only or third-party UIKit SDK surfaces into a SwiftUI app, or when migrating a UIKit app to SwiftUI incrementally."
 ---
 
 # SwiftUI-UIKit Interop
 
-Bridge UIKit and SwiftUI in both directions. Wrap UIKit views and view controllers for use in SwiftUI, embed SwiftUI views inside UIKit screens, and synchronize state across the boundary. Targets iOS 26+ with Swift 6.2 patterns; notes backward-compatible to iOS 16 unless stated otherwise.
+Bridge UIKit and SwiftUI in both directions. Wrap UIKit views and view controllers for use in SwiftUI, embed SwiftUI views inside UIKit screens, and synchronize state across the boundary. Targets iOS 26+ with Swift 6.3 patterns; notes backward-compatible to iOS 16 unless stated otherwise.
 
-See `references/representable-recipes.md` for complete wrapping recipes and `references/hosting-migration.md` for UIKit-to-SwiftUI migration patterns.
+See [references/representable-recipes.md](references/representable-recipes.md) for complete wrapping recipes and [references/hosting-migration.md](references/hosting-migration.md) for UIKit-to-SwiftUI migration patterns.
 
 ## Contents
 
@@ -17,7 +17,7 @@ See `references/representable-recipes.md` for complete wrapping recipes and `ref
 - [UIHostingController](#uihostingcontroller)
 - [Sizing and Layout](#sizing-and-layout)
 - [State Synchronization Patterns](#state-synchronization-patterns)
-- [Swift 6.2 Sendable Considerations](#swift-62-sendable-considerations)
+- [Sendable Considerations](#sendable-considerations)
 - [Common Mistakes](#common-mistakes)
 - [Review Checklist](#review-checklist)
 - [References](#references)
@@ -353,9 +353,9 @@ func updateUIView(_ uiView: UITextView, context: Context) {
 
 Without the guard, setting `uiView.text` may trigger the delegate's `textViewDidChange`, which writes to `parent.text`, which triggers `updateUIView` again.
 
-## Swift 6.2 Sendable Considerations
+## Sendable Considerations
 
-UIKit delegate protocols are not `Sendable`. When the coordinator conforms to a UIKit delegate, it inherits main-actor isolation from UIKit. Mark coordinators `@MainActor` or use `nonisolated` only for methods that truly do not touch UIKit state. In Swift 6.2 with strict concurrency:
+UIKit delegate protocols are not `Sendable`. When the coordinator conforms to a UIKit delegate, it inherits main-actor isolation from UIKit. Mark coordinators `@MainActor` or use `nonisolated` only for methods that truly do not touch UIKit state. In Swift 6 strict concurrency:
 
 ```swift
 @MainActor
@@ -415,14 +415,14 @@ If passing closures across isolation boundaries, ensure they are `@Sendable` or 
 - [ ] `UIHostingController` properly added as child (`addChild` + `didMove(toParent:)`)
 - [ ] Sizing strategy chosen (`intrinsicContentSize` vs fixed `frame` vs `sizeThatFits`)
 - [ ] Environment values read in `updateUIView` via `context.environment` where needed
-- [ ] Coordinator marked `@MainActor` for Swift 6.2 strict concurrency
+- [ ] Coordinator marked `@MainActor` for strict concurrency
 - [ ] Modal controllers dismiss in all delegate exit paths (success, cancel, error)
 - [ ] `UIHostingConfiguration` used for collection/table view cells instead of manual hosting (iOS 16+)
 
 ## References
 
-- Wrapping recipes: `references/representable-recipes.md`
-- Migration patterns: `references/hosting-migration.md`
-- Apple docs: [UIViewRepresentable](https://sosumi.ai/documentation/SwiftUI/UIViewRepresentable)
-- Apple docs: [UIViewControllerRepresentable](https://sosumi.ai/documentation/SwiftUI/UIViewControllerRepresentable)
-- Apple docs: [UIHostingController](https://sosumi.ai/documentation/SwiftUI/UIHostingController)
+- Wrapping recipes: [references/representable-recipes.md](references/representable-recipes.md)
+- Migration patterns: [references/hosting-migration.md](references/hosting-migration.md)
+- Apple docs: [UIViewRepresentable](https://sosumi.ai/documentation/swiftui/UIViewRepresentable)
+- Apple docs: [UIViewControllerRepresentable](https://sosumi.ai/documentation/swiftui/UIViewControllerRepresentable)
+- Apple docs: [UIHostingController](https://sosumi.ai/documentation/swiftui/UIHostingController)

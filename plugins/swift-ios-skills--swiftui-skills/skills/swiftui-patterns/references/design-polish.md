@@ -353,7 +353,7 @@ struct ProfileView: View {
 
 - Avoid sprinkling raw `Color` values in views; it breaks consistency.
 - Do not tie theme to a single view’s local state.
-- Avoid using `@Environment(\\.colorScheme)` as the only theme control; it should complement your theme.
+- Avoid using `@Environment(\.colorScheme)` as the only theme control; it should complement your theme.
 
 ## Haptics
 

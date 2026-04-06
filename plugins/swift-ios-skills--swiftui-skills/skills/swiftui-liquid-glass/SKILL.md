@@ -5,26 +5,22 @@ description: "Implement, review, or improve SwiftUI Liquid Glass effects for iOS
 
 # SwiftUI Liquid Glass
 
-## Contents
-
-- [Overview](#overview)
-- [Workflow](#workflow)
-- [Core API Summary](#core-api-summary)
-- [Code Examples](#code-examples)
-- [Common Mistakes](#common-mistakes)
-- [Review Checklist](#review-checklist)
-- [Available MCP Tools](#available-mcp-tools)
-- [References](#references)
-
-## Overview
-
 Liquid Glass is the dynamic translucent material introduced in iOS 26 (and iPadOS 26,
 macOS 26, tvOS 26, watchOS 26). It blurs content behind it, reflects surrounding color
 and light, and reacts to touch and pointer interactions. Standard SwiftUI components
 (tab bars, toolbars, navigation bars, sheets) adopt Liquid Glass automatically when
 built with the iOS 26 SDK. Use the APIs below for custom views and controls.
 
-See `references/liquid-glass.md` for the full API reference with additional examples.
+See [references/liquid-glass.md](references/liquid-glass.md) for the full API reference with additional examples.
+
+## Contents
+
+- [Workflow](#workflow)
+- [Core API Summary](#core-api-summary)
+- [Code Examples](#code-examples)
+- [Common Mistakes](#common-mistakes)
+- [Review Checklist](#review-checklist)
+- [References](#references)
 
 ## Workflow
 
@@ -314,12 +310,8 @@ Liquid Glass requires iOS 26+. Gate with `if #available(iOS 26, *)` and provide 
 - [ ] **Button styles**: Standard `.glass` / `.glassProminent` used for buttons.
 - [ ] Ensure types driving Liquid Glass effects are Sendable; apply glass effects on @MainActor context
 
-## Available MCP Tools
-
-- **xcodebuildmcp**: If available, use to build and test your project directly.
-
 ## References
 
-- Full API guide: `references/liquid-glass.md`
-- Apple docs: [Applying Liquid Glass to custom views](https://sosumi.ai/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
+- Full API guide: [references/liquid-glass.md](references/liquid-glass.md)
+- Apple docs: [Applying Liquid Glass to custom views](https://sosumi.ai/documentation/swiftui/Applying-Liquid-Glass-to-custom-views)
 - Apple docs: [Adopting Liquid Glass](https://sosumi.ai/documentation/technologyoverviews/adopting-liquid-glass)

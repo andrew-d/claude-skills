@@ -1,6 +1,6 @@
-# Swift 6.2 Concurrency Changes
+# Concurrency Patterns
 
-Swift 6.2 introduces "approachable concurrency" -- a philosophy shift where
+Approachable concurrency patterns introduced in Swift 6.2+ — a philosophy shift where
 code stays single-threaded by default until you choose to introduce concurrency.
 
 ## Contents

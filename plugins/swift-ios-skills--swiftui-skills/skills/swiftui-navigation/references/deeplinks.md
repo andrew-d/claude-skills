@@ -1,5 +1,17 @@
 # Deep links and navigation
 
+## Contents
+
+- [Intent](#intent)
+- [Core patterns](#core-patterns)
+- [Example: router entry points](#example-router-entry-points)
+- [Example: attach to a root view](#example-attach-to-a-root-view)
+- [Design choices to keep](#design-choices-to-keep)
+- [Pitfalls](#pitfalls)
+- [Universal Links](#universal-links)
+- [Custom URL Schemes](#custom-url-schemes)
+- [NSUserActivity Continuation (Handoff)](#nsuseractivity-continuation-handoff)
+
 ## Intent
 
 Route external URLs into in-app destinations while falling back to system handling when needed.

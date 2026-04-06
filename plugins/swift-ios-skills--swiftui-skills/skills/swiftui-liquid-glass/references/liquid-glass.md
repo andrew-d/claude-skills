@@ -376,12 +376,12 @@ if #available(iOS 26, *) {
 
 ## Apple Documentation Links
 
-- [Applying Liquid Glass to custom views](https://sosumi.ai/documentation/SwiftUI/Applying-Liquid-Glass-to-custom-views)
+- [Applying Liquid Glass to custom views](https://sosumi.ai/documentation/swiftui/Applying-Liquid-Glass-to-custom-views)
 - [Adopting Liquid Glass](https://sosumi.ai/documentation/technologyoverviews/adopting-liquid-glass)
-- [Landmarks: Building an app with Liquid Glass](https://sosumi.ai/documentation/SwiftUI/Landmarks-Building-an-app-with-Liquid-Glass)
-- [View.glassEffect(_:in:)](https://sosumi.ai/documentation/SwiftUI/View/glassEffect(_:in:))
-- [Glass](https://sosumi.ai/documentation/SwiftUI/Glass)
-- [GlassEffectContainer](https://sosumi.ai/documentation/SwiftUI/GlassEffectContainer)
-- [GlassEffectTransition](https://sosumi.ai/documentation/SwiftUI/GlassEffectTransition)
-- [GlassButtonStyle](https://sosumi.ai/documentation/SwiftUI/GlassButtonStyle)
-- [GlassProminentButtonStyle](https://sosumi.ai/documentation/SwiftUI/GlassProminentButtonStyle)
+- [Landmarks: Building an app with Liquid Glass](https://sosumi.ai/documentation/swiftui/Landmarks-Building-an-app-with-Liquid-Glass)
+- [View.glassEffect(_:in:)](https://sosumi.ai/documentation/swiftui/View/glassEffect(_:in:))
+- [Glass](https://sosumi.ai/documentation/swiftui/Glass)
+- [GlassEffectContainer](https://sosumi.ai/documentation/swiftui/GlassEffectContainer)
+- [GlassEffectTransition](https://sosumi.ai/documentation/swiftui/GlassEffectTransition)
+- [GlassButtonStyle](https://sosumi.ai/documentation/swiftui/GlassButtonStyle)
+- [GlassProminentButtonStyle](https://sosumi.ai/documentation/swiftui/GlassProminentButtonStyle)

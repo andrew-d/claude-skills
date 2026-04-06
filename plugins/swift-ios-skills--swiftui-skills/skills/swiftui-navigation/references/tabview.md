@@ -174,5 +174,5 @@ TabView {
 - Do not nest `@Observable` objects inside other `@Observable` objects.
 - Ensure `AppTab.id` values are stable; dynamic cases should hash on stable IDs.
 - Special tabs (compose) should not change selection.
-- Use `Tab(value:)` with `TabView(selection:)` -- do not use the deprecated `.tabItem { }` API.
+- Prefer `Tab(value:)` with `TabView(selection:)` over the older `.tabItem { }` API for typed tab selection.
 - `tabBarMinimizeBehavior` only works on iPhone; it has no effect on iPad or Mac.

@@ -1,18 +1,18 @@
 ---
 name: swiftui-animation
-description: "Implement, review, or improve SwiftUI animations and transitions. Use when adding implicit or explicit animations with withAnimation, configuring spring animations (.smooth, .snappy, .bouncy), building phase or keyframe animations with PhaseAnimator/KeyframeAnimator, creating hero transitions with matchedGeometryEffect or matchedTransitionSource, adding SF Symbol effects (bounce, pulse, variableColor, breathe, rotate, wiggle), implementing custom Transition or CustomAnimation types, or ensuring animations respect accessibilityReduceMotion."
+description: "Implement, review, or improve SwiftUI animations and transitions. Use when adding explicit animations with withAnimation, configuring implicit animations with .animation(_:body:) or .animation(_:value:), configuring spring animations (.smooth, .snappy, .bouncy), building phase or keyframe animations with PhaseAnimator/KeyframeAnimator, creating hero transitions with matchedGeometryEffect or matchedTransitionSource, adding SF Symbol effects (bounce, pulse, variableColor, breathe, rotate, wiggle), implementing custom Transition or CustomAnimation types, or ensuring animations respect accessibilityReduceMotion."
 ---
 
 # SwiftUI Animation (iOS 26+)
 
 Review, write, and fix SwiftUI animations. Apply modern animation APIs with
-correct timing, transitions, and accessibility handling using Swift 6.2 patterns.
+correct timing, transitions, and accessibility handling using Swift 6.3 patterns.
 
 ## Contents
 
 - [Triage Workflow](#triage-workflow)
 - [withAnimation (Explicit Animation)](#withanimation-explicit-animation)
-- [.animation(_:value:) (Implicit Animation)](#animation_value-implicit-animation)
+- [Implicit Animation](#implicit-animation)
 - [Spring Type (iOS 17+)](#spring-type-ios-17)
 - [PhaseAnimator (iOS 17+)](#phaseanimator-ios-17)
 - [KeyframeAnimator (iOS 17+)](#keyframeanimator-ios-17)
@@ -33,7 +33,7 @@ correct timing, transitions, and accessibility handling using Swift 6.2 patterns
 
 | Category | API | When to use |
 |---|---|---|
-| State-driven | `withAnimation`, `.animation(_:value:)` | Simple property changes |
+| State-driven | `withAnimation`, `.animation(_:body:)`, `.animation(_:value:)` | Explicit state changes, selective modifier animation, or simple value-bound changes |
 | Multi-phase | `PhaseAnimator` | Sequenced multi-step animations |
 | Keyframe | `KeyframeAnimator` | Complex multi-property choreography |
 | Shared element | `matchedGeometryEffect` | Layout-driven hero transitions |
@@ -83,7 +83,21 @@ withAnimation(.smooth(duration: 0.35), completionCriteria: .logicallyComplete) {
 } completion: { loadContent() }
 ```
 
-## .animation(_:value:) (Implicit Animation)
+## Implicit Animation
+
+Prefer `.animation(_:body:)` when only specific modifiers should animate.
+Use `.animation(_:value:)` for simple value-bound changes that can animate the
+view's animatable modifiers together.
+
+```swift
+Badge()
+    .foregroundStyle(isActive ? .green : .secondary)
+    .animation(.snappy) { content in
+        content
+            .scaleEffect(isActive ? 1.15 : 1.0)
+            .opacity(isActive ? 1.0 : 0.7)
+    }
+```
 
 ```swift
 Circle()
@@ -202,24 +216,7 @@ Replaces manual `AnimatableData` boilerplate. Attach to any type with
 animatable stored properties.
 
 ```swift
-// WRONG: Manual AnimatableData (verbose, error-prone)
-struct WaveShape: Shape, Animatable {
-    var frequency: Double
-    var amplitude: Double
-    var phase: Double
-
-    var animatableData: AnimatablePair<Double, AnimatablePair<Double, Double>> {
-        get { AnimatablePair(frequency, AnimatablePair(amplitude, phase)) }
-        set {
-            frequency = newValue.first
-            amplitude = newValue.second.first
-            phase = newValue.second.second
-        }
-    }
-    // ...
-}
-
-// CORRECT: @Animatable macro synthesizes animatableData
+// Replaces manual AnimatableData boilerplate
 @Animatable
 struct WaveShape: Shape {
     var frequency: Double
@@ -420,13 +417,19 @@ Image(systemName: "wifi")
 
 ## Common Mistakes
 
-### 1. Animating without a value binding
+### 1. Using bare `.animation(_:)` when you need precise scope
 
 ```swift
-// WRONG — triggers on any state change
+// TOO BROAD — applies when the view changes
 .animation(.easeIn)
-// CORRECT — bind to specific value
+
+// CORRECT — bind animation to one value
 .animation(.easeIn, value: isVisible)
+
+// CORRECT — scope animation to selected modifiers
+.animation(.easeIn) { content in
+    content.opacity(isVisible ? 1.0 : 0.0)
+}
 ```
 
 ### 2. Expensive work inside animation closures
@@ -459,7 +462,9 @@ withAnimation(.spring.delay(0.5)) { isVisible = true }
 // WRONG — no animation, content transition has no effect
 Text("\(count)").contentTransition(.numericText(countsDown: true))
 // CORRECT — pair with animation
-Text("\(count)").contentTransition(.numericText(countsDown: true)).animation(.snappy, value: count)
+Text("\(count)")
+    .contentTransition(.numericText(countsDown: true))
+    .animation(.snappy, value: count)
 ```
 
 ### 7. navigationTransition on wrong view
@@ -469,13 +474,14 @@ Apply `.navigationTransition(.zoom(sourceID:in:))` on the outermost destination 
 ## Review Checklist
 
 - [ ] Animation curve matches intent (spring for natural, ease for mechanical)
-- [ ] `withAnimation` wraps state change, not view; `.animation(_:value:)` has explicit `value`
+- [ ] `withAnimation` wraps the state change; implicit animation uses `.animation(_:body:)` for selective modifier scope or `.animation(_:value:)` with an explicit value
 - [ ] `matchedGeometryEffect` has exactly one source per ID; zoom uses matching `id`/`namespace`
 - [ ] `@Animatable` macro used instead of manual `animatableData`
 - [ ] `accessibilityReduceMotion` checked; no `DispatchQueue`/`UIView.animate`
-- [ ] Transitions use `.transition()`; `contentTransition` paired with `.animation(_:value:)`
+- [ ] Transitions use `.transition()`; `contentTransition` is paired with animation and uses the narrowest implicit animation scope that fits
 - [ ] Animated state changes on @MainActor; animation-driving types are Sendable
 
 ## References
 
-- See `references/animation-advanced.md` for CustomAnimation protocol, full Spring variants, all Transition types, symbol effect details, Transaction system, UnitCurve types, and performance guidance.
+- See [references/animation-advanced.md](references/animation-advanced.md) for CustomAnimation protocol, full Spring variants, all Transition types, symbol effect details, Transaction system, UnitCurve types, and performance guidance.
+- Core Animation bridging patterns: [references/core-animation-bridge.md](references/core-animation-bridge.md)

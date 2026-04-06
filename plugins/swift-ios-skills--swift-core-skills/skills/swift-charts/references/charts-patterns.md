@@ -886,10 +886,10 @@ Use `chartOverlay` or `chartBackground` to access `ChartProxy`:
 
 ## Apple Documentation Links
 
-- [Swift Charts](https://sosumi.ai/documentation/Charts)
-- [Creating a chart using Swift Charts](https://sosumi.ai/documentation/Charts/Creating-a-chart-using-Swift-Charts)
-- [BarMark](https://sosumi.ai/documentation/Charts/BarMark)
-- [LineMark](https://sosumi.ai/documentation/Charts/LineMark)
-- [SectorMark](https://sosumi.ai/documentation/Charts/SectorMark)
-- [LinePlot](https://sosumi.ai/documentation/Charts/LinePlot)
-- [AxisMarks](https://sosumi.ai/documentation/Charts/AxisMarks)
+- [Swift Charts](https://sosumi.ai/documentation/charts)
+- [Creating a chart using Swift Charts](https://sosumi.ai/documentation/charts/Creating-a-chart-using-Swift-Charts)
+- [BarMark](https://sosumi.ai/documentation/charts/BarMark)
+- [LineMark](https://sosumi.ai/documentation/charts/LineMark)
+- [SectorMark](https://sosumi.ai/documentation/charts/SectorMark)
+- [LinePlot](https://sosumi.ai/documentation/charts/LinePlot)
+- [AxisMarks](https://sosumi.ai/documentation/charts/AxisMarks)

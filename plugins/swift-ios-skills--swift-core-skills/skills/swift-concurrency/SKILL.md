@@ -1,11 +1,11 @@
 ---
 name: swift-concurrency
-description: "Resolve Swift concurrency compiler errors, adopt Swift 6.2 approachable concurrency (SE-0466), and write data-race-safe async code. Use when fixing Sendable conformance errors, actor isolation warnings, or strict concurrency diagnostics; when adopting default MainActor isolation, @concurrent, nonisolated(nonsending), or Task.immediate; when designing actor-based architectures, structured concurrency with TaskGroup, or background work offloading; or when migrating from @preconcurrency to full Swift 6 strict concurrency."
+description: "Resolve Swift concurrency compiler errors, adopt approachable concurrency (SE-0466), and write data-race-safe async code. Use when fixing Sendable conformance errors, actor isolation warnings, or strict concurrency diagnostics; when adopting default MainActor isolation, @concurrent, nonisolated(nonsending), or Task.immediate; when designing actor-based architectures, structured concurrency with TaskGroup, or background work offloading; or when migrating from @preconcurrency to full Swift 6 strict concurrency."
 ---
 
-# Swift 6.2 Concurrency
+# Swift Concurrency
 
-Review, fix, and write concurrent Swift code targeting Swift 6.2+. Apply actor
+Review, fix, and write concurrent Swift code targeting Swift 6.3+. Apply actor
 isolation, Sendable safety, and modern concurrency patterns with minimal
 behavior changes.
 
@@ -106,7 +106,7 @@ of hopping to the global concurrent executor. This is the
 ```swift
 class PhotoProcessor {
     func extractSticker(data: Data, with id: String?) async -> Sticker? {
-        // In Swift 6.2, this runs on the caller's actor (e.g., MainActor)
+        // In Swift 6.2+, this runs on the caller's actor (e.g., MainActor)
         // instead of hopping to a background thread.
         // ...
     }
@@ -192,12 +192,6 @@ for await _ in Observations { model.count } {
 }
 ```
 
-### SE-0481: weak let (Proposed — Swift 6.2+)
-
-Immutable weak references (`weak let`) that enable `Sendable` conformance for
-types holding weak references. Proposed in SE-0481; may not yet be available in
-shipping toolchains.
-
 ### Isolated Conformances
 
 A conformance that needs MainActor state is called an *isolated conformance*.
@@ -229,6 +223,15 @@ If `ImageExporter` were `nonisolated`, adding a `StickerModel` would fail:
 "Main actor-isolated conformance of 'StickerModel' to 'Exportable' cannot be
 used in nonisolated context."
 
+### Clock Epochs
+
+`ContinuousClock` and `SuspendingClock` now expose `.epoch` (SE-0473), enabling instant comparison and conversion between clock types.
+
+```swift
+let continuous = ContinuousClock()
+let elapsed = continuous.now - continuous.epoch  // Duration since system boot
+```
+
 ## Actor Isolation Rules
 
 1. All mutable shared state MUST be protected by an actor or global actor.
@@ -256,6 +259,18 @@ used in nonisolated context."
    modify. Plan to remove it.
 
 ## Structured Concurrency Patterns
+
+### Async Defer
+
+`defer` blocks can now contain `await` (SE-0493). Use for async cleanup — closing connections, flushing buffers, or releasing resources that require an async call.
+
+```swift
+func fetchData() async throws -> Data {
+    let connection = try await openConnection()
+    defer { await connection.close() }
+    return try await connection.read()
+}
+```
 
 **Task:** Unstructured, inherits caller context.
 ```swift
@@ -356,7 +371,7 @@ paths, or bridging C/ObjC — use low-level synchronization primitives:
 
 **Key rule:** Never put locks inside actors (double synchronization), and never
 hold a lock across `await` (deadlock risk). See
-`references/synchronization-primitives.md` for full API details, code examples,
+[references/synchronization-primitives.md](references/synchronization-primitives.md) for full API details, code examples,
 and a decision guide for choosing locks vs actors.
 
 ## Common Mistakes
@@ -397,12 +412,12 @@ and a decision guide for choosing locks vs actors.
 
 ## References
 
-- See `references/swift-6-2-concurrency.md` for detailed Swift 6.2 changes,
+- See [references/concurrency-patterns.md](references/concurrency-patterns.md) for detailed approachable concurrency patterns,
   patterns, and migration examples.
-- See `references/approachable-concurrency.md` for the approachable concurrency
+- See [references/approachable-concurrency.md](references/approachable-concurrency.md) for the approachable concurrency
   mode quick-reference guide.
-- See `references/swiftui-concurrency.md` for SwiftUI-specific concurrency
+- See [references/swiftui-concurrency.md](references/swiftui-concurrency.md) for SwiftUI-specific concurrency
   guidance.
-- See `references/synchronization-primitives.md` for Mutex, OSAllocatedUnfairLock,
+- See [references/synchronization-primitives.md](references/synchronization-primitives.md) for Mutex, OSAllocatedUnfairLock,
   and guidance on choosing locks vs actors.
 

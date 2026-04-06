@@ -1,12 +1,12 @@
 ---
-name: codable-patterns
-description: "Encode and decode Swift types to and from JSON, property lists, and other external representations using Codable, JSONEncoder, and JSONDecoder. Use when implementing API response parsing, custom CodingKeys for key remapping, custom init(from:) or encode(to:) for complex transformations, nested or flattened JSON structures, heterogeneous array decoding, date and data decoding strategies, lossy array wrappers, Codable integration with URLSession, SwiftData, or UserDefaults, or when configuring encoder/decoder output formatting and key strategies."
+name: swift-codable
+description: "Implement Swift Codable models for JSON and property-list encoding and decoding with JSONDecoder, JSONEncoder, CodingKeys, and custom init(from:) or encode(to:). Use when parsing API responses, remapping keys, flattening nested JSON, handling date or data decoding strategies, decoding heterogeneous arrays, or integrating Codable with URLSession, SwiftData, or UserDefaults."
 ---
 
-# Codable Patterns
+# Swift Codable
 
 Encode and decode Swift types using `Codable` (`Encodable & Decodable`) with
-`JSONEncoder`, `JSONDecoder`, and related APIs. Targets Swift 6.2 / iOS 26+.
+`JSONEncoder`, `JSONDecoder`, and related APIs. Targets Swift 6.3 / iOS 26+.
 
 ## Contents
 

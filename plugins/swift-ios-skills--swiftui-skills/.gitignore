@@ -3,3 +3,5 @@
 CLAUDE.md
 .playwright-mcp
 tmp
+firebase-debug.log
+.claude
