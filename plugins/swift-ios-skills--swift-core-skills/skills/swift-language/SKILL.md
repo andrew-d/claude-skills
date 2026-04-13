@@ -5,9 +5,8 @@ description: "Apply modern Swift language patterns and idioms for non-concurrenc
 
 # Swift Language Patterns
 
-Core Swift language features and modern syntax patterns targeting Swift 5.9+
-through Swift 6. Covers language constructs, type system features, Codable,
-string and collection APIs, and formatting. For concurrency (actors, async/await,
+Core Swift language features and modern syntax patterns targeting Swift 6.3. Covers language constructs, type system features, Codable,
+string and collection APIs, formatting, C interop (`@c`), module disambiguation (`ModuleName::symbol`), and performance attributes (`@specialized`, `@inline(always)`). For concurrency (actors, async/await,
 Sendable), see the `swift-concurrency` skill. For SwiftUI views and state
 management, see `swiftui-patterns`.
 
@@ -373,7 +372,7 @@ struct Record: Decodable {
 }
 ```
 
-See `references/swift-patterns-extended.md` for additional Codable patterns
+See [references/swift-patterns-extended.md](references/swift-patterns-extended.md) for additional Codable patterns
 (enums with associated values, date strategies, unkeyed containers).
 
 ## Modern Collection APIs
@@ -453,7 +452,7 @@ let date = try Date("Mar 15, 2024", strategy: .dateTime.month().day().year())
 
 ## String Interpolation
 
-Extend `DefaultStringInterpolation` for domain-specific formatting. Use `"""` for multi-line strings (indentation is relative to the closing `"""`). See `references/swift-patterns-extended.md` for custom interpolation examples.
+Extend `DefaultStringInterpolation` for domain-specific formatting. Use `"""` for multi-line strings (indentation is relative to the closing `"""`). See [references/swift-patterns-extended.md](references/swift-patterns-extended.md) for custom interpolation examples.
 
 ## Common Mistakes
 
@@ -481,18 +480,16 @@ Extend `DefaultStringInterpolation` for domain-specific formatting. Use `"""` fo
 ## Review Checklist
 
 - [ ] `some` used over `any` where possible
-- [ ] `guard` used for preconditions, not nested `if let`
-- [ ] Collection APIs used instead of manual loops
+- [ ] `guard` for preconditions; collection APIs instead of manual loops
 - [ ] `.formatted()` used instead of `DateFormatter`/`NumberFormatter`
-- [ ] Codable types use `CodingKeys` for API key mapping
-- [ ] `decodeIfPresent` with defaults for optional JSON fields
-- [ ] if/switch expressions used for simple conditional assignment
-- [ ] Property wrappers have clear reuse justification
+- [ ] Codable types use `CodingKeys` for API mapping; `decodeIfPresent` with defaults for optional fields
+- [ ] if/switch expressions for conditional assignment; property wrappers have clear reuse justification
 - [ ] Regex builder used for complex patterns (literal OK for simple ones)
-- [ ] String interpolation is clean -- no unnecessary `String(describing:)`
+- [ ] String interpolation is clean; no unnecessary `String(describing:)`
 - [ ] Typed throws used when callers benefit from exhaustive error handling
 - [ ] `Never` used appropriately in generic contexts
 
 ## References
 
-- Extended patterns and Codable examples: `references/swift-patterns-extended.md`
+- Extended patterns and Codable examples: [references/swift-patterns-extended.md](references/swift-patterns-extended.md)
+- Attributes and C interop (`@c`, `@specialized`, `@inline(always)`, `@export`, `ModuleName::symbol`): [references/swift-attributes-interop.md](references/swift-attributes-interop.md)

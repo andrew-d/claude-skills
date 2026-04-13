@@ -5,7 +5,7 @@ description: "Build SwiftUI layouts using stacks, grids, lists, scroll views, fo
 
 # SwiftUI Layout & Components
 
-Layout and component patterns for SwiftUI apps targeting iOS 26+ with Swift 6.2. Covers stack and grid layouts, list patterns, scroll views, forms, controls, search, and overlays. Patterns are backward-compatible to iOS 17 unless noted.
+Layout and component patterns for SwiftUI apps targeting iOS 26+ with Swift 6.3. Covers stack and grid layouts, list patterns, scroll views, forms, controls, search, and overlays. Patterns are backward-compatible to iOS 17 unless noted.
 
 ## Contents
 
@@ -81,7 +81,7 @@ LazyVGrid(columns: columns, spacing: 4) {
 
 Use `.aspectRatio` for cell sizing. Never place `GeometryReader` inside lazy containers -- it forces eager measurement and defeats lazy loading. Use `.onGeometryChange` (iOS 18+) if you need to read dimensions.
 
-See `references/grids.md` for full grid patterns and design choices.
+See [references/grids.md](references/grids.md) for full grid patterns and design choices.
 
 ## List Patterns
 
@@ -110,7 +110,7 @@ List {
 
 **iOS 26:** Apply `.scrollEdgeEffectStyle(.soft, for: .top)` for modern scroll edge effects.
 
-See `references/list.md` for full list patterns including feed lists with scroll-to-top.
+See [references/list.md](references/list.md) for full list patterns including feed lists with scroll-to-top.
 
 ## ScrollView
 
@@ -152,7 +152,7 @@ ScrollViewReader { proxy in
 - `.backgroundExtensionEffect()` -- mirror/blur at safe area edges (use sparingly, one per screen)
 - `.safeAreaBar(edge:)` -- attach bar views that integrate with scroll effects
 
-See `references/scrollview.md` for full scroll patterns and iOS 26 edge effects.
+See [references/scrollview.md](references/scrollview.md) for full scroll patterns and iOS 26 edge effects.
 
 ## Form and Controls
 
@@ -216,7 +216,7 @@ Picker("Default Visibility", selection: $visibility) {
 
 Avoid `.pickerStyle(.segmented)` for large sets; use menu or inline styles. Don't hide labels for sliders; always show context.
 
-See `references/form.md` for full form examples.
+See [references/form.md](references/form.md) for full form examples.
 
 ## Searchable
 
@@ -328,9 +328,9 @@ Prefer overlays for transient UI rather than embedding in layout stacks. Use tra
 
 ## References
 
-- Grid patterns: `references/grids.md`
-- List and section patterns: `references/list.md`
-- ScrollView and lazy stacks: `references/scrollview.md`
-- Form patterns: `references/form.md`
+- Grid patterns: [references/grids.md](references/grids.md)
+- List and section patterns: [references/list.md](references/list.md)
+- ScrollView and lazy stacks: [references/scrollview.md](references/scrollview.md)
+- Form patterns: [references/form.md](references/form.md)
 - Architecture and state management: see `swiftui-patterns` skill
 - Navigation patterns: see `swiftui-navigation` skill

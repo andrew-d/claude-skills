@@ -9,7 +9,7 @@ Build data visualizations with Swift Charts targeting iOS 26+. Compose marks
 inside a `Chart` container, configure axes and scales with view modifiers, and
 use vectorized plots for large datasets.
 
-See `references/charts-patterns.md` for extended patterns, accessibility, and
+See [references/charts-patterns.md](references/charts-patterns.md) for extended patterns, accessibility, and
 theming guidance.
 
 ## Contents
@@ -482,6 +482,6 @@ Chart(data) { item in
 
 ## References
 
-- Extended patterns: `references/charts-patterns.md`
-- Apple docs: [Swift Charts](https://sosumi.ai/documentation/Charts)
-- Apple docs: [Creating a chart using Swift Charts](https://sosumi.ai/documentation/Charts/Creating-a-chart-using-Swift-Charts)
+- Extended patterns: [references/charts-patterns.md](references/charts-patterns.md)
+- Apple docs: [Swift Charts](https://sosumi.ai/documentation/charts)
+- Apple docs: [Creating a chart using Swift Charts](https://sosumi.ai/documentation/charts/Creating-a-chart-using-Swift-Charts)

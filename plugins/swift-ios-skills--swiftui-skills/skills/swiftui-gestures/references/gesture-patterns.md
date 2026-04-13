@@ -3,6 +3,16 @@
 Extended patterns for SwiftUI gesture handling. See the main `SKILL.md` for
 core APIs and common mistakes.
 
+## Contents
+
+- [Pinch-to-Zoom with MagnifyGesture](#pinch-to-zoom-with-magnifygesture)
+- [Combined Rotate + Scale](#combined-rotate--scale)
+- [Drag-to-Reorder](#drag-to-reorder)
+- [Gesture Velocity Calculations](#gesture-velocity-calculations)
+- [Long-Press then Drag](#long-press-then-drag-sequenced-gesture-with-state-enum)
+- [SwiftUI + UIKit Gesture Interop](#swiftui--uikit-gesture-interop)
+- [Accessibility Considerations](#accessibility-considerations)
+
 ## Pinch-to-Zoom with MagnifyGesture
 
 Full implementation with clamped scale, double-tap reset, and smooth animation:

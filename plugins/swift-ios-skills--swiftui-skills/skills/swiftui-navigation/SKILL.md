@@ -5,7 +5,7 @@ description: "Implement SwiftUI navigation patterns including NavigationStack, N
 
 # SwiftUI Navigation
 
-Navigation patterns for SwiftUI apps targeting iOS 26+ with Swift 6.2. Covers push navigation, multi-column layouts, sheet presentation, tab architecture, and deep linking. Patterns are backward-compatible to iOS 17 unless noted.
+Navigation patterns for SwiftUI apps targeting iOS 26+ with Swift 6.3. Covers push navigation, multi-column layouts, sheet presentation, tab architecture, and deep linking. Patterns are backward-compatible to iOS 17 unless noted.
 
 ## Contents
 
@@ -52,7 +52,7 @@ path = NavigationPath()  // Pop to root
 
 **Router pattern:** For apps with complex navigation, use a router object that owns the path and sheet state. Each tab gets its own router instance injected via `.environment()`. Centralize destination mapping with a single `.navigationDestination(for:)` block or a shared `withAppRouter()` modifier.
 
-See `references/navigationstack.md` for full router examples including per-tab stacks, centralized destination mapping, and generic tab routing.
+See [references/navigationstack.md](references/navigationstack.md) for full router examples including per-tab stacks, centralized destination mapping, and generic tab routing.
 
 ## NavigationSplitView (Multi-Column)
 
@@ -149,7 +149,7 @@ Fine-tuning: `.fitted(horizontal:vertical:)` constrains fitting axes; `.sticky(h
 
 **Dismissal confirmation (macOS 15+ / iOS 26+):** Use `.dismissalConfirmationDialog("Discard?", shouldPresent: hasUnsavedChanges)` to prevent accidental dismissal of sheets with unsaved changes.
 
-**Enum-driven sheet routing:** Define a `SheetDestination` enum that is `Identifiable`, store it on the router, and map it with a shared view modifier. This lets any child view present sheets without prop-drilling. See `references/sheets.md` for the full centralized sheet routing pattern.
+**Enum-driven sheet routing:** Define a `SheetDestination` enum that is `Identifiable`, store it on the router, and map it with a shared view modifier. This lets any child view present sheets without prop-drilling. See [references/sheets.md](references/sheets.md) for the full centralized sheet routing pattern.
 
 ## Tab-Based Navigation
 
@@ -185,7 +185,7 @@ struct MainTabView: View {
 - **`.tabViewBottomAccessory { }`** -- attach content below the tab bar (e.g., Now Playing bar)
 - **`TabSection`** -- group tabs into sidebar sections with `.tabPlacement(.sidebarOnly)`
 
-See `references/tabview.md` for full TabView patterns including custom bindings, dynamic tabs, and sidebar customization.
+See [references/tabview.md](references/tabview.md) for full TabView patterns including custom bindings, dynamic tabs, and sidebar customization.
 
 ## Deep Links
 
@@ -224,7 +224,7 @@ Register schemes in `Info.plist` under `CFBundleURLTypes`. Handle with `.onOpenU
 
 Advertise activities with `.userActivity()` and receive them with `.onContinueUserActivity()`. Declare activity types in `Info.plist` under `NSUserActivityTypes`. Set `isEligibleForHandoff = true` and provide a `webpageURL` as fallback.
 
-See `references/deeplinks.md` for full examples of AASA configuration, router URL handling, custom URL schemes, and NSUserActivity continuation.
+See [references/deeplinks.md](references/deeplinks.md) for full examples of AASA configuration, router URL handling, custom URL schemes, and NSUserActivity continuation.
 
 ## Common Mistakes
 
@@ -233,7 +233,7 @@ See `references/deeplinks.md` for full examples of AASA configuration, router UR
 3. Using `.sheet(isPresented:)` when state represents a model -- use `.sheet(item:)` instead
 4. Storing view instances in `NavigationPath` -- store lightweight `Hashable` route data
 5. Nesting `@Observable` router objects inside other `@Observable` objects
-6. Using deprecated `.tabItem { }` API -- use `Tab(value:)` with `TabView(selection:)`
+6. Prefer `Tab(value:)` with `TabView(selection:)` over the older `.tabItem { }` API
 7. Assuming `tabBarMinimizeBehavior` works on iPad -- it is iPhone only
 8. Handling deep links in multiple places -- centralize URL parsing in the router
 9. Hard-coding sheet frame dimensions -- use `.presentationSizing(.form)` instead
@@ -254,9 +254,9 @@ See `references/deeplinks.md` for full examples of AASA configuration, router UR
 
 ## References
 
-- NavigationStack and router patterns: `references/navigationstack.md`
-- Sheet presentation and routing: `references/sheets.md`
-- TabView patterns and iOS 26 API: `references/tabview.md`
-- Deep links, universal links, and Handoff: `references/deeplinks.md`
+- NavigationStack and router patterns: [references/navigationstack.md](references/navigationstack.md)
+- Sheet presentation and routing: [references/sheets.md](references/sheets.md)
+- TabView patterns and iOS 26 API: [references/tabview.md](references/tabview.md)
+- Deep links, universal links, and Handoff: [references/deeplinks.md](references/deeplinks.md)
 - Architecture and state management: see `swiftui-patterns` skill
 - Layout and components: see `swiftui-layout-components` skill

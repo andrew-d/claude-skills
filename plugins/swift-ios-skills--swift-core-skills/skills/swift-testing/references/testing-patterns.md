@@ -208,7 +208,7 @@ extension Tag {
 func apiCallReturnsData() async throws { /* ... */ }
 ```
 
-Filter tests by tag in Xcode test plans or CLI (`swift test --filter tag:critical`).
+Filter tests by tag in Xcode test plans or CLI (tag-based filtering syntax varies by toolchain — verify for your Swift version).
 
 ## TestScoping and Test Organization
 

@@ -1,11 +1,11 @@
 ---
 name: swiftui-patterns
-description: "Build SwiftUI views with modern MV architecture, state management, and view composition patterns. Covers @Observable ownership rules, @State/@Bindable/@Environment wiring, view decomposition, custom ViewModifiers, environment values, async data loading with .task, iOS 26+ new APIs, Writing Tools, and performance guidelines. Use when structuring an MV-pattern app, managing state with @Observable, composing view hierarchies, or applying SwiftUI best practices. For navigation patterns see swiftui-navigation skill."
+description: "Build SwiftUI views with modern MV architecture, state management, and view composition patterns. Covers @Observable ownership rules, @State/@Bindable/@Environment wiring, view decomposition, custom ViewModifiers, environment values, async data loading with .task, iOS 26+ APIs, Writing Tools, and performance guidelines. Use when structuring a SwiftUI app, managing state with @Observable, composing view hierarchies, or applying SwiftUI best practices."
 ---
 
 # SwiftUI Patterns
 
-Modern SwiftUI patterns targeting iOS 26+ with Swift 6.2. Covers architecture, state management, view composition, environment wiring, async loading, design polish, and platform/share integration. Navigation and layout patterns live in dedicated sibling skills. Patterns are backward-compatible to iOS 17 unless noted.
+Modern SwiftUI patterns targeting iOS 26+ with Swift 6.3. Covers architecture, state management, view composition, environment wiring, async loading, design polish, and platform/share integration. Navigation and layout patterns live in dedicated sibling skills. Patterns are backward-compatible to iOS 17 unless noted.
 
 ## Contents
 
@@ -23,7 +23,7 @@ Modern SwiftUI patterns targeting iOS 26+ with Swift 6.2. Covers architecture, s
 - [Review Checklist](#review-checklist)
 - [References](#references)
 
-**Related skills:** For navigation patterns (NavigationStack, sheets, tabs, deep links), see the `swiftui-navigation` skill. For layout and components (grids, lists, scroll views, forms, controls), see the `swiftui-layout-components` skill.
+**Scope boundary:** This skill covers architecture, state ownership, composition, environment wiring, async loading, and related SwiftUI app structure patterns. Detailed navigation patterns are covered in the `swiftui-navigation` skill, including `NavigationStack`, `NavigationSplitView`, sheets, tabs, and deep-linking patterns. Detailed layout, container, and component patterns are covered in the `swiftui-layout-components` skill, including stacks, grids, lists, scroll view patterns, forms, controls, search UI with `.searchable`, overlays, and related layout components.
 
 ## Architecture: Model-View (MV) Pattern
 
@@ -74,7 +74,7 @@ struct FeedView: View {
 }
 ```
 
-For MV pattern rationale, app wiring, and lightweight client examples, see `references/architecture-patterns.md`.
+For MV pattern rationale, app wiring, and lightweight client examples, see [references/architecture-patterns.md](references/architecture-patterns.md).
 
 ## State Management
 
@@ -220,10 +220,6 @@ extension View { func cardStyle() -> some View { modifier(CardStyle()) } }
 
 Avoid top-level conditional view swapping. Prefer a single stable base view with conditions inside sections or modifiers. When a view file exceeds ~300 lines, split with extensions and `// MARK: -` comments.
 
-## Navigation
-
-For NavigationStack, NavigationSplitView, sheets, tabs, and deep linking patterns, see the dedicated `swiftui-navigation` skill.
-
 ## Environment
 
 ### Custom Environment Values
@@ -300,10 +296,6 @@ Never create manual `Task` in `onAppear` unless you need to store a reference fo
 - **Avoid body recomputation:** Move filtering and sorting to computed properties or the model, not inline in `body`.
 - **Equatable views:** For complex views that re-render unnecessarily, conform to `Equatable`.
 
-## Component Reference
-
-For layout, grids, lists, forms, controls, and scrollview patterns, see the dedicated `swiftui-layout-components` skill.
-
 ## HIG Alignment
 
 Follow Apple Human Interface Guidelines for layout, typography, color, and accessibility. Key rules:
@@ -314,7 +306,7 @@ Follow Apple Human Interface Guidelines for layout, typography, color, and acces
 - Support adaptive layouts via `horizontalSizeClass`
 - Provide VoiceOver labels (`.accessibilityLabel`) and support Dynamic Type accessibility sizes by switching layout orientation
 
-See `references/design-polish.md` for HIG, theming, haptics, focus, transitions, and loading patterns.
+See [references/design-polish.md](references/design-polish.md) for HIG, theming, haptics, focus, transitions, and loading patterns.
 
 ## Writing Tools (iOS 18+)
 
@@ -350,7 +342,7 @@ TextField("Search…", text: $query)
 8. Using `NavigationView` -- deprecated; use `NavigationStack`
 9. Inline closures in body -- extract complex closures to methods
 10. `.sheet(isPresented:)` when state represents a model -- use `.sheet(item:)` instead
-11. **Using `AnyView` for type erasure** -- causes identity resets and disables diffing. Use `@ViewBuilder`, `Group`, or generics instead. See `references/deprecated-migration.md`
+11. **Using `AnyView` for type erasure** -- causes identity resets and disables diffing. Use `@ViewBuilder`, `Group`, or generics instead. See [references/deprecated-migration.md](references/deprecated-migration.md)
 
 ## Review Checklist
 
@@ -372,10 +364,8 @@ TextField("Search…", text: $query)
 
 ## References
 
-- Architecture, app wiring, and lightweight clients: `references/architecture-patterns.md`
-- Design polish (HIG, theming, haptics, transitions, loading, focus): `references/design-polish.md`
-- Deprecated API migration: `references/deprecated-migration.md`
-- Platform and sharing patterns (Transferable, media, menus, macOS settings): `references/platform-and-sharing.md`
-- Navigation patterns: see `swiftui-navigation` skill
-- Layout & components: see `swiftui-layout-components` skill
+- Architecture, app wiring, and lightweight clients: [references/architecture-patterns.md](references/architecture-patterns.md)
+- Design polish (HIG, theming, haptics, transitions, loading, focus): [references/design-polish.md](references/design-polish.md)
+- Deprecated API migration: [references/deprecated-migration.md](references/deprecated-migration.md)
+- Platform and sharing patterns (Transferable, media, menus, macOS settings): [references/platform-and-sharing.md](references/platform-and-sharing.md)
 

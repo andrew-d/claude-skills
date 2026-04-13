@@ -23,7 +23,6 @@ Swift Testing is the modern testing framework for Swift (Xcode 16+, Swift 6+). P
 - [Test Attachments](#test-attachments)
 - [Exit Testing](#exit-testing)
 - [Review Checklist](#review-checklist)
-- [MCP Integration](#mcp-integration)
 - [References](#references)
 
 ---
@@ -87,7 +86,7 @@ let first = try #require(items.first)
 
 ## @Suite and Test Organization
 
-See `references/testing-patterns.md` for suite organization, confirmation patterns, and known-issue handling.
+See [references/testing-patterns.md](references/testing-patterns.md) for suite organization, confirmation patterns, and known-issue handling.
 
 ## Known Issues
 
@@ -115,7 +114,7 @@ If no known issues are recorded, Swift Testing records a distinct issue notifyin
 
 ## Additional Patterns
 
-See `references/testing-patterns.md` for complete examples of:
+See [references/testing-patterns.md](references/testing-patterns.md) for complete examples of:
 
 - **TestScoping** -- custom test lifecycle with setup/teardown consolidation
 - **Mocking and Test Doubles** -- protocol-based doubles and testable architecture
@@ -216,14 +215,12 @@ extension Tag {
 
 ### Filtering Tests by Tag
 
-Run tagged tests from Xcode Test Plans or the command line:
+Run tagged tests from Xcode Test Plans or the command line. Tag-based filtering
+syntax varies by toolchain — verify the exact flags for your Swift version:
 
 ```bash
-# Run only tests tagged .networking
+# Filter by tag (tooling-specific — verify syntax for your Swift version)
 swift test --filter tag:networking
-
-# Exclude slow tests
-swift test --skip tag:slow
 ```
 
 In Xcode, configure Test Plans to include/exclude tags for different CI configurations (smoke tests vs full suite).
@@ -273,6 +270,17 @@ struct DatabaseTests {
         #expect(count == 1)
     }
 }
+```
+
+### Warning-Severity Issues
+
+Record issues that surface in test output but don't fail the test. Use for performance regressions, deprecated paths, or non-critical checks you want to track.
+
+```swift
+Issue.record(
+    "Processing took \(elapsed)s — exceeds 2s target",
+    severity: .warning
+)
 ```
 
 ## Async Testing Patterns
@@ -350,6 +358,19 @@ If the test exceeds the time limit, it fails immediately with a clear timeout di
 }
 ```
 
+### Programmatic Cancellation
+
+Stop a test without marking it passed or failed. The test is recorded as "cancelled" — distinct from failure or a known issue.
+
+```swift
+@Test func requiresNetwork() throws {
+    guard NetworkMonitor.shared.isConnected else {
+        try Test.cancel("No network — skipping integration test")
+    }
+    // ... test continues if connected
+}
+```
+
 ## Traits In Depth
 
 ### Conditional Traits
@@ -410,6 +431,42 @@ extension Trait where Self == DatabaseTrait {
 func insertUser() async throws { ... }
 ```
 
+## Test Attachments
+
+Attach diagnostic data to test results for debugging failures. See [references/testing-patterns.md](references/testing-patterns.md) for full examples.
+
+```swift
+@Test func generateReport() async throws {
+    let report = try generateReport()
+    Attachment(report.data, named: "report.json").record()
+    #expect(report.isValid)
+}
+```
+
+Image attachments are available via cross-import overlays — import both `Testing` and a UI framework:
+
+```swift
+import Testing
+import UIKit
+
+@Test func renderedChart() async throws {
+    let image = renderer.image { ctx in chartView.drawHierarchy(in: bounds, afterScreenUpdates: true) }
+    Attachment(image, named: "chart.png").record()
+}
+```
+
+## Exit Testing
+
+Test code that calls `exit()`, `fatalError()`, or `preconditionFailure()`. See [references/testing-patterns.md](references/testing-patterns.md) for details.
+
+```swift
+@Test func invalidInputCausesExit() async {
+    await #expect(processExitsWith: .failure) {
+        processInvalidInput()  // calls fatalError()
+    }
+}
+```
+
 ## Common Mistakes
 
 1. **Testing implementation, not behavior.** Test what the code does, not how.
@@ -421,30 +478,6 @@ func insertUser() async throws { ... }
 7. **Not testing cancellation.** If code supports `Task` cancellation, verify it cancels cleanly.
 8. **Mixing XCTest and Swift Testing in one file.** Keep them in separate files.
 9. **Non-Sendable test helpers shared across tests.** Ensure test helper types are Sendable when shared across concurrent test cases. Annotate MainActor-dependent test code with `@MainActor`.
-
-## Test Attachments
-
-Attach diagnostic data to test results for debugging failures. See `references/testing-patterns.md` for full examples.
-
-```swift
-@Test func generateReport() async throws {
-    let report = try generateReport()
-    Attachment(report.data, named: "report.json").record()
-    #expect(report.isValid)
-}
-```
-
-## Exit Testing
-
-Test code that calls `exit()`, `fatalError()`, or `preconditionFailure()`. See `references/testing-patterns.md` for details.
-
-```swift
-@Test func invalidInputCausesExit() async {
-    await #expect(processExitsWith: .failure) {
-        processInvalidInput()  // calls fatalError()
-    }
-}
-```
 
 ## Review Checklist
 
@@ -458,10 +491,7 @@ Test code that calls `exit()`, `fatalError()`, or `preconditionFailure()`. See `
 - [ ] No shared mutable state between tests
 - [ ] Cancellation tested for cancellable async operations
 
-## MCP Integration
-
-- **xcodebuildmcp**: Build and run tests directly — full suites, individual functions, tag-filtered runs.
-
 ## References
 
-- Testing patterns: `references/testing-patterns.md`
+- Testing patterns: [references/testing-patterns.md](references/testing-patterns.md)
+- Advanced testing (warnings, cancellation, image attachments): [references/testing-advanced.md](references/testing-advanced.md)

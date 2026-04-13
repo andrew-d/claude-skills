@@ -11,6 +11,7 @@ Covers material beyond the SKILL.md summary.
 - [PhaseAnimator Deep Patterns](#phaseanimator-deep-patterns)
 - [KeyframeAnimator Multi-Track Examples](#keyframeanimator-multi-track-examples)
 - [Transaction and TransactionKey](#transaction-and-transactionkey)
+- [Scoped Implicit Animation](#scoped-implicit-animation)
 - [All Transition Types (iOS 17+)](#all-transition-types-ios-17)
 - [All Symbol Effect Types](#all-symbol-effect-types)
 - [Reduce Motion Implementation Patterns](#reduce-motion-implementation-patterns)
@@ -426,13 +427,13 @@ withTransaction(transaction) {
 ### Overriding Animations with Transaction
 
 ```swift
-// Disable animation for a subtree
+// Remove the incoming transaction animation for this scoped content
 SomeView()
     .transaction { transaction in
         transaction.animation = nil
     }
 
-// Override animation for a subtree when a value changes
+// Override the scoped transaction animation when a value changes
 SomeView()
     .transaction(value: selectedTab) { transaction in
         transaction.animation = .smooth(duration: 0.3)
@@ -468,6 +469,22 @@ withTransaction(transaction) { dragOffset = newOffset }
 ParentView()
     .transaction { $0.animation = .spring } body: { content in
         content.scaleEffect(scale)
+    }
+```
+
+### Scoped Implicit Animation
+
+Use `.animation(_:body:)` when only selected modifiers should animate.
+Use `.animation(_:value:)` when a single value change should drive the view's
+animatable modifiers together. Use `.transaction(_:body:)` when you need to
+scope transaction overrides rather than attach one animation.
+
+```swift
+CardView(isExpanded: isExpanded)
+    .animation(.smooth) { content in
+        content
+            .scaleEffect(isExpanded ? 1.05 : 1.0)
+            .shadow(radius: isExpanded ? 12 : 4)
     }
 ```
 

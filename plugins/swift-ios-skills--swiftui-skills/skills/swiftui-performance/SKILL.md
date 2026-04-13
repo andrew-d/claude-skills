@@ -5,9 +5,10 @@ description: "Audit and improve SwiftUI runtime performance. Use when diagnosing
 
 # SwiftUI Performance
 
+Audit SwiftUI view performance end-to-end, from instrumentation and baselining to root-cause analysis and concrete remediation steps.
+
 ## Contents
 
-- [Overview](#overview)
 - [Workflow Decision Tree](#workflow-decision-tree)
 - [1. Code-First Review](#1-code-first-review)
 - [2. Guide the User to Profile](#2-guide-the-user-to-profile)
@@ -16,7 +17,6 @@ description: "Audit and improve SwiftUI runtime performance. Use when diagnosing
 - [Common Code Smells (and Fixes)](#common-code-smells-and-fixes)
 - [5. Verify](#5-verify)
 - [Outputs](#outputs)
-- [MCP Tool Notes](#mcp-tool-notes)
 - [Instruments Profiling](#instruments-profiling)
 - [Identity and Lifetime](#identity-and-lifetime)
 - [Lazy Loading Patterns](#lazy-loading-patterns)
@@ -24,10 +24,6 @@ description: "Audit and improve SwiftUI runtime performance. Use when diagnosing
 - [Common Mistakes](#common-mistakes)
 - [Review Checklist](#review-checklist)
 - [References](#references)
-
-## Overview
-
-Audit SwiftUI view performance end-to-end, from instrumentation and baselining to root-cause analysis and concrete remediation steps.
 
 ## Workflow Decision Tree
 
@@ -59,7 +55,8 @@ Provide:
 ## 2. Guide the User to Profile
 
 Explain how to collect data with Instruments:
-- Use the SwiftUI template in Instruments (always profile a **Release build**).
+- Use the SwiftUI template in Instruments.
+- Profile a **Release build** on a real device when possible.
 - Reproduce the exact interaction (scroll, navigation, animation).
 - Capture SwiftUI timeline and Time Profiler.
 - Export or screenshot the relevant lanes and the call tree.
@@ -197,10 +194,6 @@ Provide:
 - A short metrics table (before/after if available).
 - Top issues (ordered by impact).
 - Proposed fixes with estimated effort.
-
-## MCP Tool Notes
-
-- **xcodebuildmcp**: When building for profiling, use Release configuration. Debug builds include extra runtime checks that distort performance measurements. Always profile Release builds on a real device when possible.
 
 ## Instruments Profiling
 
@@ -466,7 +459,7 @@ Use computed properties on `@Observable` models to derive state without introduc
 2. **Observing an entire model when only one property is needed.** Break large `@Observable` models into focused ones, or use computed properties/closures to narrow observation scope.
 3. **Using `GeometryReader` inside ScrollView items.** GeometryReader forces eager sizing and defeats lazy loading. Prefer `.onGeometryChange` (iOS 18+) or measure outside the lazy container.
 4. **Calling `DateFormatter()` or `NumberFormatter()` inside `body`.** These are expensive to create. Make them static or move them outside the view.
-5. **Animating non-equatable state.** If SwiftUI cannot determine equality, it redraws every frame. Conform state to `Equatable` or use `.animation(_:value:)` with an explicit value.
+5. **Animating non-equatable state.** If SwiftUI cannot determine equality, it redraws every frame. Conform state to `Equatable`, then use `.animation(_:value:)` for simple value-bound changes or `.animation(_:body:)` for narrower modifier-scoped implicit animation.
 6. **Large flat `List` without identifiers.** Use `id:` or make items `Identifiable` so SwiftUI can diff efficiently instead of rebuilding the entire list.
 7. **Unnecessary `@State` wrapper objects.** Wrapping a simple value type in a class for `@State` defeats value semantics. Use plain `@State` with structs.
 8. **Blocking `MainActor` with synchronous I/O.** File reads, JSON parsing of large payloads, and image decoding should happen off the main actor. Use `Task.detached` or a custom actor.
@@ -478,14 +471,15 @@ Use computed properties on `@Observable` models to derive state without introduc
 - [ ] `@Observable` models expose only the properties views actually read
 - [ ] Heavy computation is off `MainActor` (image processing, parsing)
 - [ ] `GeometryReader` is not inside a `LazyVStack`/`LazyHStack`/`List`
-- [ ] Animations use explicit `value:` parameter
+- [ ] Implicit animations use `.animation(_:value:)` for value-bound changes or `.animation(_:body:)` for narrower modifier scope
 - [ ] No synchronous network/file I/O on the main thread
 - [ ] Profiling done on Release build, real device
 - [ ] `@Observable` view models are `@MainActor`-isolated; types crossing concurrency boundaries are `Sendable`
 
 ## References
 
-- Demystify SwiftUI performance (WWDC23): `references/demystify-swiftui-performance-wwdc23.md`
-- Optimizing SwiftUI performance with Instruments: `references/optimizing-swiftui-performance-instruments.md`
-- Understanding hangs in your app: `references/understanding-hangs-in-your-app.md`
-- Understanding and improving SwiftUI performance: `references/understanding-improving-swiftui-performance.md`
+- Demystify SwiftUI performance (WWDC23): [references/demystify-swiftui-performance-wwdc23.md](references/demystify-swiftui-performance-wwdc23.md)
+- Optimizing SwiftUI performance with Instruments: [references/optimizing-swiftui-performance-instruments.md](references/optimizing-swiftui-performance-instruments.md)
+- Understanding hangs in your app: [references/understanding-hangs-in-your-app.md](references/understanding-hangs-in-your-app.md)
+- Understanding and improving SwiftUI performance: [references/understanding-improving-swiftui-performance.md](references/understanding-improving-swiftui-performance.md)
+- WWDC transcript sources: [references/wwdc-session-sources.md](references/wwdc-session-sources.md)

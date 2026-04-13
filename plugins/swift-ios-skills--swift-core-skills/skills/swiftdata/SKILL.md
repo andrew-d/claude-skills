@@ -6,7 +6,7 @@ description: "Implement, review, or improve data persistence using SwiftData. Us
 # SwiftData
 
 Persist, query, and manage structured data in iOS 26+ apps using SwiftData
-with Swift 6.2.
+with Swift 6.3.
 
 ## Contents
 
@@ -324,11 +324,11 @@ struct DetailView: View {
 
 ## References
 
-- See `references/swiftdata-advanced.md` for custom data stores, history
+- See [references/swiftdata-advanced.md](references/swiftdata-advanced.md) for custom data stores, history
   tracking, CloudKit, Core Data coexistence, composite attributes,
   model inheritance, undo/redo, and performance patterns.
-- See `references/swiftdata-queries.md` for @Query variants, FetchDescriptor
+- See [references/swiftdata-queries.md](references/swiftdata-queries.md) for @Query variants, FetchDescriptor
   deep dive, sectioned queries, dynamic queries, and background fetch patterns.
-- See `references/core-data-coexistence.md` for standalone Core Data patterns
+- See [references/core-data-coexistence.md](references/core-data-coexistence.md) for standalone Core Data patterns
   and Core Data to SwiftData migration strategies.
 

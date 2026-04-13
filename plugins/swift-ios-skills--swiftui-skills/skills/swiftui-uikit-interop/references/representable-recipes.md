@@ -6,131 +6,19 @@ Complete working recipes for common UIKit wrapping scenarios. Each recipe includ
 
 ## Contents
 
-- [1. WKWebView Wrapper](#1-wkwebview-wrapper)
-- [2. MKMapView Wrapper](#2-mkmapview-wrapper)
-- [3. UITextView Wrapper (Attributed Text)](#3-uitextview-wrapper-attributed-text)
-- [4. AVCaptureVideoPreviewLayer Wrapper](#4-avcapturevideopreviewlayer-wrapper)
-- [5. PHPickerViewController Wrapper](#5-phpickerviewcontroller-wrapper)
-- [6. MFMailComposeViewController Wrapper](#6-mfmailcomposeviewcontroller-wrapper)
-- [7. UIActivityViewController Wrapper (Share Sheet)](#7-uiactivityviewcontroller-wrapper-share-sheet)
-- [8. UISearchBar Wrapper](#8-uisearchbar-wrapper)
-- [9. SFSafariViewController Wrapper](#9-sfsafariviewcontroller-wrapper)
-- [10. PDFView Wrapper (PDFKit)](#10-pdfview-wrapper-pdfkit)
-- [11. MFMessageComposeViewController Wrapper](#11-mfmessagecomposeviewcontroller-wrapper)
+- [1. MKMapView Wrapper](#1-mkmapview-wrapper)
+- [2. UITextView Wrapper (Attributed Text)](#2-uitextview-wrapper-attributed-text)
+- [3. AVCaptureVideoPreviewLayer Wrapper](#3-avcapturevideopreviewlayer-wrapper)
+- [4. PHPickerViewController Wrapper](#4-phpickerviewcontroller-wrapper)
+- [5. MFMailComposeViewController Wrapper](#5-mfmailcomposeviewcontroller-wrapper)
+- [6. UIActivityViewController Wrapper (Share Sheet)](#6-uiactivityviewcontroller-wrapper-share-sheet)
+- [7. UISearchBar Wrapper](#7-uisearchbar-wrapper)
+- [8. PDFView Wrapper (PDFKit)](#8-pdfview-wrapper-pdfkit)
+- [9. MFMessageComposeViewController Wrapper](#9-mfmessagecomposeviewcontroller-wrapper)
 
-## 1. WKWebView Wrapper
+> Native WebKit for SwiftUI now covers modern embedded web content on iOS 26+. See the `swiftui-webkit` skill for `WebView`, `WebPage`, navigation policies, JavaScript calls, and migration guidance. Keep this file focused on generic representable patterns.
 
-Load URLs, handle navigation, expose back/forward state, and bridge JavaScript.
-
-```swift
-import SwiftUI
-import WebKit
-
-struct WebView: UIViewRepresentable {
-    let url: URL
-    @Binding var isLoading: Bool
-    @Binding var canGoBack: Bool
-    @Binding var canGoForward: Bool
-    var onNavigationFinished: ((URL?) -> Void)?
-
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
-
-    func makeUIView(context: Context) -> WKWebView {
-        let config = WKWebViewConfiguration()
-        let webView = WKWebView(frame: .zero, configuration: config)
-        webView.navigationDelegate = context.coordinator
-        webView.allowsBackForwardNavigationGestures = true
-
-        // KVO for loading and navigation state
-        context.coordinator.observe(webView)
-
-        webView.load(URLRequest(url: url))
-        return webView
-    }
-
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        // Only reload if the URL changed
-        if uiView.url != url {
-            uiView.load(URLRequest(url: url))
-        }
-    }
-
-    static func dismantleUIView(_ uiView: WKWebView, coordinator: Coordinator) {
-        coordinator.cancellables.removeAll()
-    }
-
-    func goBack(_ webView: WKWebView) { webView.goBack() }
-    func goForward(_ webView: WKWebView) { webView.goForward() }
-
-    final class Coordinator: NSObject, WKNavigationDelegate {
-        var parent: WebView
-        var cancellables: [NSKeyValueObservation] = []
-
-        init(_ parent: WebView) { self.parent = parent }
-
-        func observe(_ webView: WKWebView) {
-            cancellables.append(
-                webView.observe(\.isLoading) { [weak self] webView, _ in
-                    self?.parent.isLoading = webView.isLoading
-                }
-            )
-            cancellables.append(
-                webView.observe(\.canGoBack) { [weak self] webView, _ in
-                    self?.parent.canGoBack = webView.canGoBack
-                }
-            )
-            cancellables.append(
-                webView.observe(\.canGoForward) { [weak self] webView, _ in
-                    self?.parent.canGoForward = webView.canGoForward
-                }
-            )
-        }
-
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            parent.onNavigationFinished?(webView.url)
-        }
-
-        func webView(
-            _ webView: WKWebView,
-            decidePolicyFor navigationAction: WKNavigationAction
-        ) async -> WKNavigationActionPolicy {
-            .allow
-        }
-    }
-}
-```
-
-### Usage
-
-```swift
-struct BrowserView: View {
-    @State private var isLoading = false
-    @State private var canGoBack = false
-    @State private var canGoForward = false
-
-    var body: some View {
-        WebView(
-            url: URL(string: "https://example.com")!,
-            isLoading: $isLoading,
-            canGoBack: $canGoBack,
-            canGoForward: $canGoForward
-        )
-        .overlay(alignment: .top) {
-            if isLoading { ProgressView() }
-        }
-    }
-}
-```
-
-### Gotchas
-
-- **WKWebView must not be created in `updateUIView`.** It is expensive to allocate and resets all navigation state.
-- **KVO observations must be cleaned up.** Store `NSKeyValueObservation` references and clear them in `dismantleUIView`.
-- **JavaScript bridge:** If adding `WKScriptMessageHandler`, use the coordinator as the handler and register it on the configuration before creating the web view.
-
----
-
-## 2. MKMapView Wrapper
+## 1. MKMapView Wrapper
 
 Display a map with annotations, track region changes, and toggle map type.
 
@@ -230,7 +118,7 @@ struct MapScreen: View {
 
 ---
 
-## 3. UITextView Wrapper (Attributed Text)
+## 2. UITextView Wrapper (Attributed Text)
 
 Wrap `UITextView` for rich text editing with `NSAttributedString` binding and placeholder support.
 
@@ -346,7 +234,7 @@ struct NotesEditorView: View {
 
 ---
 
-## 4. AVCaptureVideoPreviewLayer Wrapper
+## 3. AVCaptureVideoPreviewLayer Wrapper
 
 Display a live camera preview. The preview layer requires a `UIView` host.
 
@@ -408,7 +296,7 @@ struct CameraScreen: View {
 
 ---
 
-## 5. PHPickerViewController Wrapper
+## 4. PHPickerViewController Wrapper
 
 Multi-select photo picker that loads selected images asynchronously.
 
@@ -514,7 +402,7 @@ struct ImagePickerDemo: View {
 
 ---
 
-## 6. MFMailComposeViewController Wrapper
+## 5. MFMailComposeViewController Wrapper
 
 Present the system email composer with pre-filled fields and handle the result.
 
@@ -594,7 +482,7 @@ struct FeedbackView: View {
 
 ---
 
-## 7. UIActivityViewController Wrapper (Share Sheet)
+## 6. UIActivityViewController Wrapper (Share Sheet)
 
 Present the system share sheet. This is a `UIViewControllerRepresentable` because `UIActivityViewController` is a controller, not a view.
 
@@ -645,7 +533,7 @@ struct ContentView: View {
 
 ---
 
-## 8. UISearchBar Wrapper
+## 7. UISearchBar Wrapper
 
 Wrap `UISearchBar` with delegate-based callbacks, debounce support, and cancel button handling.
 
@@ -737,80 +625,7 @@ struct SearchableList: View {
 
 ---
 
-## 9. SFSafariViewController Wrapper
-
-Present an in-app browser using Safari's full rendering engine, reader mode, and content blocking.
-
-```swift
-import SwiftUI
-import SafariServices
-
-struct SafariView: UIViewControllerRepresentable {
-    let url: URL
-    var preferredBarTintColor: UIColor? = nil
-    var preferredControlTintColor: UIColor? = nil
-    var dismissButtonStyle: SFSafariViewController.DismissButtonStyle = .done
-    @Environment(\.dismiss) private var dismiss
-
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
-
-    func makeUIViewController(context: Context) -> SFSafariViewController {
-        let config = SFSafariViewController.Configuration()
-        config.entersReaderIfAvailable = false
-        config.barCollapsingEnabled = true
-
-        let safari = SFSafariViewController(url: url, configuration: config)
-        safari.delegate = context.coordinator
-        safari.preferredBarTintColor = preferredBarTintColor
-        safari.preferredControlTintColor = preferredControlTintColor
-        safari.dismissButtonStyle = dismissButtonStyle
-        return safari
-    }
-
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {
-        // SFSafariViewController does not support URL changes after creation.
-        // To navigate to a new URL, dismiss and re-present with a new URL.
-    }
-
-    final class Coordinator: NSObject, SFSafariViewControllerDelegate {
-        let parent: SafariView
-
-        init(_ parent: SafariView) { self.parent = parent }
-
-        func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
-            parent.dismiss()
-        }
-    }
-}
-```
-
-### Usage
-
-```swift
-struct ArticleView: View {
-    @State private var showSafari = false
-    let articleURL = URL(string: "https://example.com/article")!
-
-    var body: some View {
-        Button("Read Full Article") { showSafari = true }
-            .sheet(isPresented: $showSafari) {
-                SafariView(url: articleURL)
-                    .ignoresSafeArea()
-            }
-    }
-}
-```
-
-### Gotchas
-
-- **Cannot change URL after creation.** `SFSafariViewController` does not expose its navigation. To load a different URL, dismiss and present a new instance.
-- **Must use `.sheet` or fullScreenCover.** Apple rejects apps that embed `SFSafariViewController` as a child view controller inline -- it must be presented modally.
-- **The dismiss delegate is essential.** Without `safariViewControllerDidFinish`, the Done button tap does not dismiss the SwiftUI sheet, leaving the user stuck.
-- **`ignoresSafeArea()`.** Safari's own chrome handles safe areas. Without this modifier, you get double safe area insets.
-
----
-
-## 10. PDFView Wrapper (PDFKit)
+## 8. PDFView Wrapper (PDFKit)
 
 Display PDF documents in SwiftUI using `PDFView` from PDFKit. Supports loading from URL, Data, or file path, with configurable display mode and auto-scaling.
 
@@ -994,7 +809,7 @@ struct NavigablePDFView: UIViewRepresentable {
 
 ---
 
-## 11. MFMessageComposeViewController Wrapper
+## 9. MFMessageComposeViewController Wrapper
 
 Present the system SMS/MMS composer with pre-filled recipients, body, and optional attachments. Companion to Recipe 6 (MFMailComposeViewController).
 

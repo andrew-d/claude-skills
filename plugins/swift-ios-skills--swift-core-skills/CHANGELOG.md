@@ -1,5 +1,129 @@
 # Changelog
 
+## v3.1.0
+
+### Swift 6.3 update
+
+- Bump all skills from Swift 6.2 to Swift 6.3 targeting.
+- Add `async defer` (SE-0493) and clock epochs (SE-0473) to `swift-concurrency`.
+- Add `@c` (SE-0495), `@specialized` (SE-0460), `@inline(always)` guarantee (SE-0496), `@export` (SE-0497), `@section`/`@used` (SE-0492), and module selectors (SE-0491) to `swift-language`.
+- Add warning-severity issues (ST-0013), programmatic test cancellation (ST-0016), exit test value capturing (ST-0012), and image attachments (ST-0014) to `swift-testing`.
+- Integrate Swift 6.3 features into existing topical sections instead of version-siloed sections.
+- Rename version-based reference files to topic-based names (`swift-6-2-concurrency.md` → `concurrency-patterns.md`, `swift-6-3-features.md` → `swift-attributes-interop.md`, `swift-6-3-testing.md` → `testing-advanced.md`).
+- Update README badge and description for Swift 6.3.
+- Bump marketplace bundle versions to 3.1.0.
+
+## v3.0.0
+
+### Skill renames
+
+12 existing skills renamed to use Apple Kit framework names for consistency:
+
+- `live-activities` -> `activitykit`
+- `mapkit-location` -> `mapkit`
+- `photos-camera-media` -> `photokit`
+- `homekit-matter` -> `homekit`
+- `callkit-voip` -> `callkit`
+- `metrickit-diagnostics` -> `metrickit`
+- `pencilkit-drawing` -> `pencilkit`
+- `passkit-wallet` -> `passkit`
+- `musickit-audio` -> `musickit`
+- `cloudkit-sync` -> `cloudkit`
+- `eventkit-calendar` -> `eventkit`
+- `realitykit-ar` -> `realitykit`
+
+### New skills
+
+19 new Apple Kit framework skills, all grounded in official Apple documentation:
+
+- `avkit` -- AVPlayerViewController, VideoPlayer, Picture-in-Picture, AirPlay, subtitles
+- `gamekit` -- Game Center, leaderboards, achievements, real-time and turn-based multiplayer
+- `cryptokit` -- SHA256, HMAC, AES-GCM, ChaChaPoly, P256/Curve25519 signing, Secure Enclave
+- `pdfkit` -- PDFView, PDFDocument, annotations, text search, form filling, thumbnails
+- `paperkit` -- PaperMarkupViewController, markup editing, drawing, shapes (iOS 26)
+- `spritekit` -- SKScene, SKSpriteNode, SKAction, physics, particles, SpriteView
+- `scenekit` -- SCNView, SCNScene, 3D geometry, materials, lighting, physics, SceneView
+- `financekit` -- Apple Card, Apple Cash, Wallet orders, transactions, account balances
+- `accessorysetupkit` -- Privacy-preserving BLE/Wi-Fi accessory discovery, picker UI
+- `adattributionkit` -- Privacy-preserving ad attribution, postbacks, conversion values
+- `carplay` -- CarPlay templates, navigation, audio, communication, EV charging apps
+- `appmigrationkit` -- Cross-platform data transfer, export/import extensions (iOS 26)
+- `browserenginekit` -- Alternative browser engines (EU), process management, web content
+- `dockkit` -- DockAccessoryManager, camera subject tracking, motor control, framing
+- `sensorkit` -- Research-grade sensor data, ambient light, keyboard metrics (approved studies)
+- `tabletopkit` -- Multiplayer spatial board games, pieces, cards, dice (visionOS)
+- `relevancekit` -- Widget relevance signals, time/location-based providers (watchOS 26)
+- `audioaccessorykit` -- Audio accessory features, automatic switching (iOS 26.4)
+- `cryptotokenkit` -- TKTokenDriver, TKSmartCard, security tokens, certificate-based auth
+
+### Bundle changes
+
+- Add `apple-kit-skills` bundle containing all 39 Apple Kit framework skills.
+- Add `ios-gaming-skills` bundle containing `gamekit`, `spritekit`, `scenekit`, `tabletopkit`.
+- Distribute new skills into existing themed bundles.
+- Update `all-ios-skills` count from 57 to 76.
+- Fix all renamed skill paths across all existing bundles.
+
+### Other changes
+
+- Remove PaperKit content from `pencilkit` (now standalone `paperkit` skill).
+- Update README catalog, descriptions, counts, install commands, and upgrade guidance.
+- Bump Claude marketplace bundle versions to 3.0.0.
+
+### API accuracy fixes
+
+- Fix 15+ incorrect deprecation claims across skills (RotationGesture, .tabItem, .navigationBarLeading/Trailing, IntentTimelineProvider, original StoreKit APIs were not deprecated).
+- Correct API usage in activitykit, background-processing, cloudkit, debugging-instruments, energykit, shareplay-activities, swift-concurrency, and swift-testing.
+- Clarify BrowserEngineKit EU/Japan distribution requirements.
+
+### Structural improvements
+
+- Add missing scope statements to debugging-instruments, swiftui-liquid-glass, and swiftui-performance.
+- Trim photokit SKILL.md to under 500-line limit.
+- Refactor metrickit and device-integrity to extract deep detail into reference files.
+- Expand thin reference files in swiftui-layout-components, swiftui-performance, and swiftui-webkit.
+- Add Contents sections to reference files in background-processing, swiftui-gestures, and swiftui-navigation.
+- Convert all reference paths from backtick to markdown link syntax across all 76 skills.
+
+### Link and cross-reference fixes
+
+- Normalize all Sosumi documentation paths to lowercase.
+- Repair broken self-anchor links across skills.
+- Replace stale pre-rename skill names in reference file intros.
+- Remove broken reference to background-websocket.md in ios-networking.
+- Fix malformed key-path syntax in swiftui-performance reference.
+- Clarify themed bundle purpose in README (context window management, not disk savings).
+- Update apple-kit-skills description to include CarPlay.
+
+## v2.2.0
+
+- Add `swiftui-webkit`, a new SwiftUI skill for native WebKit-for-SwiftUI APIs including `WebView`, `WebPage`, navigation policies, JavaScript calls, observable page state, and custom URL schemes.
+- Narrow `swiftui-uikit-interop` back to generic interop guidance by removing `WKWebView` and `SFSafariViewController` recipes from its representable reference file and demoting web-content ownership.
+- Update the README catalog and marketplace metadata to include `swiftui-webkit`, add it to the `swiftui-skills` and `all-ios-skills` bundles, and raise the total skill count from 56 to 57.
+- Bump Claude marketplace bundle versions to 2.2.0.
+
+## v2.1.1
+
+- Consolidate repeated sibling-skill cross-references in `swiftui-patterns` into a single scope-boundary note; remove redundant redirect sections and sibling-skill routing from frontmatter description.
+- Consolidate repeated `apple-on-device-ai` cross-references in `coreml` and remove cross-skill file paths that violated self-containment.
+- Bump Claude marketplace bundle versions to 2.1.1.
+
+## v2.1.0
+
+- Rename `codable-patterns` to `swift-codable` to improve discoverability and align it with the repo's `swift-*` core-language taxonomy.
+- Tighten discovery wording for `swift-codable`, `alarmkit`, `app-clips`, and `app-intents` in skill metadata and the README catalog.
+- Clarify installation guidance in `README.md`, including skills CLI usage and the direct install command for all skills.
+- Remove stale MCP appendix/tool-note sections from `swiftui-liquid-glass`, `swift-testing`, and `swiftui-performance`; keep Release-build and real-device profiling guidance inline in the performance skill.
+- Add `firebase-debug.log` to `.gitignore`.
+- Bump Claude marketplace bundle versions to 2.1.0.
+
+## v2.0.1
+
+- Update `swiftui-animation` to cover `.animation(_:body:)` alongside `.animation(_:value:)`, and tighten wording around bare `.animation(_:)` and scoped transactions to match Apple docs.
+- Switch the repository license to PolyForm Perimeter 1.0.0 and update the README badge/license text.
+- Add `.playwright-mcp` and `tmp` to `.gitignore`.
+- Bump Claude marketplace bundle versions to 2.0.1.
+
 ## v2.0.0
 
 ### New skills (33 added)
