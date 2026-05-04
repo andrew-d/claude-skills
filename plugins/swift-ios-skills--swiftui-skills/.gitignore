@@ -5,3 +5,4 @@ CLAUDE.md
 tmp
 firebase-debug.log
 .claude
+.agents

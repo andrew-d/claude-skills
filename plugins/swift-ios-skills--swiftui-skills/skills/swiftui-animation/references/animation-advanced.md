@@ -284,17 +284,19 @@ struct FeedbackDot: View {
     @State private var feedbackTrigger = 0
 
     var body: some View {
-        Circle()
-            .frame(width: 20, height: 20)
-            .phaseAnimator(
-                [false, true, false],
-                trigger: feedbackTrigger
-            ) { content, phase in
-                content.scaleEffect(phase ? 1.5 : 1.0)
-            } animation: { _ in
-                .spring(duration: 0.25, bounce: 0.5)
-            }
-            .onTapGesture { feedbackTrigger += 1 }
+        Button { feedbackTrigger += 1 } label: {
+            Circle()
+                .frame(width: 20, height: 20)
+                .phaseAnimator(
+                    [false, true, false],
+                    trigger: feedbackTrigger
+                ) { content, phase in
+                    content.scaleEffect(phase ? 1.5 : 1.0)
+                } animation: { _ in
+                    .spring(duration: 0.25, bounce: 0.5)
+                }
+        }
+        .buttonStyle(.plain)
     }
 }
 ```
@@ -324,40 +326,42 @@ struct BouncingBadge: View {
     @State private var trigger = false
 
     var body: some View {
-        Text("NEW")
-            .font(.caption.bold())
-            .padding(6)
-            .background(.red, in: Capsule())
-            .keyframeAnimator(
-                initialValue: BounceValues(),
-                trigger: trigger
-            ) { content, value in
-                content
-                    .offset(y: value.yOffset)
-                    .scaleEffect(value.scale)
-                    .opacity(value.opacity)
-                    .rotationEffect(value.rotation)
-            } keyframes: { _ in
-                KeyframeTrack(\.yOffset) {
-                    SpringKeyframe(-20, duration: 0.2)
-                    CubicKeyframe(5, duration: 0.15)
-                    SpringKeyframe(0, duration: 0.3)
+        Button { trigger.toggle() } label: {
+            Text("NEW")
+                .font(.caption.bold())
+                .padding(.horizontal)
+                .background(.red, in: Capsule())
+                .keyframeAnimator(
+                    initialValue: BounceValues(),
+                    trigger: trigger
+                ) { content, value in
+                    content
+                        .offset(y: value.yOffset)
+                        .scaleEffect(value.scale)
+                        .opacity(value.opacity)
+                        .rotationEffect(value.rotation)
+                } keyframes: { _ in
+                    KeyframeTrack(\.yOffset) {
+                        SpringKeyframe(-20, duration: 0.2)
+                        CubicKeyframe(5, duration: 0.15)
+                        SpringKeyframe(0, duration: 0.3)
+                    }
+                    KeyframeTrack(\.scale) {
+                        CubicKeyframe(1.3, duration: 0.2)
+                        CubicKeyframe(0.95, duration: 0.15)
+                        SpringKeyframe(1.0, duration: 0.3)
+                    }
+                    KeyframeTrack(\.rotation) {
+                        LinearKeyframe(.degrees(-5), duration: 0.1)
+                        LinearKeyframe(.degrees(5), duration: 0.1)
+                        SpringKeyframe(.zero, duration: 0.2)
+                    }
+                    KeyframeTrack(\.opacity) {
+                        MoveKeyframe(1.0)
+                    }
                 }
-                KeyframeTrack(\.scale) {
-                    CubicKeyframe(1.3, duration: 0.2)
-                    CubicKeyframe(0.95, duration: 0.15)
-                    SpringKeyframe(1.0, duration: 0.3)
-                }
-                KeyframeTrack(\.rotation) {
-                    LinearKeyframe(.degrees(-5), duration: 0.1)
-                    LinearKeyframe(.degrees(5), duration: 0.1)
-                    SpringKeyframe(.zero, duration: 0.2)
-                }
-                KeyframeTrack(\.opacity) {
-                    MoveKeyframe(1.0)
-                }
-            }
-            .onTapGesture { trigger.toggle() }
+        }
+        .buttonStyle(.plain)
     }
 }
 ```

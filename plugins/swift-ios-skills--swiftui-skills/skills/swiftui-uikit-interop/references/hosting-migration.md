@@ -373,7 +373,7 @@ func collectionView(
                 ProgressView()
             }
             .frame(width: 60, height: 60)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(.rect(cornerRadius: 8))
 
             VStack(alignment: .leading) {
                 Text(item.title).font(.headline)

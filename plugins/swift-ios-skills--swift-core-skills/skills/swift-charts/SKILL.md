@@ -282,7 +282,7 @@ BarMark(x: .value("Month", item.month), y: .value("Sales", item.sales))
 .chartLegend(.hidden)                                           // Hide
 .chartLegend(position: .bottom, alignment: .center, spacing: 10) // Position
 .chartLegend(position: .bottom) {                                // Custom
-    HStack(spacing: 16) {
+    HStack {
         ForEach(categories, id: \.self) { cat in
             Label(cat, systemImage: "circle.fill").font(.caption)
         }

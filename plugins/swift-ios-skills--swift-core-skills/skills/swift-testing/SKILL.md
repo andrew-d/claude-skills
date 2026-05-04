@@ -1,6 +1,6 @@
 ---
 name: swift-testing
-description: "Write and migrate tests using the Swift Testing framework with @Test, @Suite, #expect, #require, confirmation, parameterized tests, test tags, traits, withKnownIssue, XCTest UI testing, XCUITest, test plan, mocking, test doubles, testable architecture, snapshot testing, async test patterns, test organization, and test-driven development in Swift. Use when writing or migrating tests with Swift Testing framework, implementing parameterized tests, working with test traits, converting XCTest to Swift Testing, or setting up test organization and mocking patterns."
+description: "Writes and migrates tests using the Swift Testing framework with @Test, @Suite, #expect, #require, confirmation, parameterized tests, test tags, traits, withKnownIssue, XCTest UI testing, XCUITest, test plan, mocking, test doubles, testable architecture, snapshot testing, async test patterns, test organization, and test-driven development in Swift. Use when writing or migrating tests with Swift Testing framework, implementing parameterized tests, working with test traits, converting XCTest to Swift Testing, or setting up test organization and mocking patterns."
 ---
 
 # Swift Testing
@@ -13,12 +13,9 @@ Swift Testing is the modern testing framework for Swift (Xcode 16+, Swift 6+). P
 - [@Test Traits](#test-traits)
 - [#expect and #require](#expect-and-require)
 - [@Suite and Test Organization](#suite-and-test-organization)
+- [Execution Model](#execution-model)
 - [Known Issues](#known-issues)
 - [Additional Patterns](#additional-patterns)
-- [Parameterized Tests In Depth](#parameterized-tests-in-depth)
-- [Tags and Suites In Depth](#tags-and-suites-in-depth)
-- [Async Testing Patterns](#async-testing-patterns)
-- [Traits In Depth](#traits-in-depth)
 - [Common Mistakes](#common-mistakes)
 - [Test Attachments](#test-attachments)
 - [Exit Testing](#exit-testing)
@@ -86,7 +83,27 @@ let first = try #require(items.first)
 
 ## @Suite and Test Organization
 
-See [references/testing-patterns.md](references/testing-patterns.md) for suite organization, confirmation patterns, and known-issue handling.
+See [references/testing-patterns.md](references/testing-patterns.md) for suite organization, confirmation patterns, known-issue handling, and execution-model details.
+
+## Execution Model
+
+Swift Testing runs tests in parallel by default. Do not assume test order, shared suite instances, or exclusive access to mutable state unless you explicitly design for it.
+
+```swift
+@Suite(.serialized)
+struct KeychainTests {
+    @Test func storesToken() throws { /* ... */ }
+    @Test func deletesToken() throws { /* ... */ }
+}
+```
+
+Use `.serialized` when a test or suite must run one-at-a-time because it touches shared external state. It does not make unrelated tests outside that scope run serially.
+
+**Rules:**
+- Each test must set up its own state.
+- Shared mutable globals are a bug unless protected or intentionally serialized.
+- `@Suite(.serialized)` is for exclusive execution, not for expressing logical ordering between tests.
+- If tests depend on sequence, combine them into one test or move the sequence into shared helper code.
 
 ## Known Issues
 
@@ -114,322 +131,7 @@ If no known issues are recorded, Swift Testing records a distinct issue notifyin
 
 ## Additional Patterns
 
-See [references/testing-patterns.md](references/testing-patterns.md) for complete examples of:
-
-- **TestScoping** -- custom test lifecycle with setup/teardown consolidation
-- **Mocking and Test Doubles** -- protocol-based doubles and testable architecture
-- **View Model Testing** -- environment injection and dependency isolation
-- **Async Patterns** -- clock injection and error path testing
-- **XCUITest** -- page objects, performance testing, snapshot testing, and test file organization
-
-## Parameterized Tests In Depth
-
-### @Test with Arguments
-
-Pass any `Sendable` & `Collection` to `arguments:`. Each element runs as an independent test case.
-
-```swift
-// Enum-based: runs one case per enum value
-enum Environment: String, CaseIterable, Sendable {
-    case development, staging, production
-}
-
-@Test("Base URL is valid for all environments", arguments: Environment.allCases)
-func baseURLIsValid(env: Environment) throws {
-    let url = try #require(URL(string: Config.baseURL(for: env)))
-    #expect(url.scheme == "https")
-}
-```
-
-### Ranges as Arguments
-
-```swift
-@Test("Fibonacci is positive for small inputs", arguments: 1...20)
-func fibonacciPositive(n: Int) {
-    #expect(fibonacci(n) > 0)
-}
-```
-
-### Multiple Parameter Sources
-
-Two argument collections produce a **cartesian product** (every combination):
-
-```swift
-@Test(arguments: ["light", "dark"], ["iPhone", "iPad"])
-func snapshotTest(colorScheme: String, device: String) {
-    // Runs 4 combinations: light+iPhone, light+iPad, dark+iPhone, dark+iPad
-    let config = SnapshotConfig(colorScheme: colorScheme, device: device)
-    #expect(config.isValid)
-}
-```
-
-Use `zip` for **1:1 pairing** (avoids cartesian product):
-
-```swift
-@Test(arguments: zip(
-    [200, 201, 204],
-    ["OK", "Created", "No Content"]
-))
-func httpStatusDescription(code: Int, expected: String) {
-    #expect(HTTPStatus(code).description == expected)
-}
-```
-
-### Custom Argument Generators
-
-Create a `CustomTestArgumentProviding` conformance or use computed static properties:
-
-```swift
-struct APIEndpoint: Sendable {
-    let path: String
-    let expectedStatus: Int
-
-    static let testCases: [APIEndpoint] = [
-        .init(path: "/users", expectedStatus: 200),
-        .init(path: "/missing", expectedStatus: 404),
-    ]
-}
-
-@Test("API returns expected status", arguments: APIEndpoint.testCases)
-func apiStatus(endpoint: APIEndpoint) async throws {
-    let response = try await client.get(endpoint.path)
-    #expect(response.statusCode == endpoint.expectedStatus)
-}
-```
-
-## Tags and Suites In Depth
-
-### Custom Tag Definitions
-
-Declare tags as static members on `Tag`:
-
-```swift
-extension Tag {
-    @Tag static var networking: Self
-    @Tag static var database: Self
-    @Tag static var slow: Self
-    @Tag static var critical: Self
-    @Tag static var smoke: Self
-}
-```
-
-### Filtering Tests by Tag
-
-Run tagged tests from Xcode Test Plans or the command line. Tag-based filtering
-syntax varies by toolchain — verify the exact flags for your Swift version:
-
-```bash
-# Filter by tag (tooling-specific — verify syntax for your Swift version)
-swift test --filter tag:networking
-```
-
-In Xcode, configure Test Plans to include/exclude tags for different CI configurations (smoke tests vs full suite).
-
-### @Suite for Grouping
-
-```swift
-@Suite("Shopping Cart Operations")
-struct ShoppingCartTests {
-    let cart: ShoppingCart
-
-    // init acts as setUp -- runs before each test in the suite
-    init() {
-        cart = ShoppingCart()
-        cart.add(Product(name: "Widget", price: 9.99))
-    }
-
-    @Test func itemCount() {
-        #expect(cart.items.count == 1)
-    }
-
-    @Test func totalPrice() {
-        #expect(cart.total == 9.99)
-    }
-}
-```
-
-### Suite-Level Setup and Teardown
-
-Use `init` for setup and `deinit` for teardown. For async cleanup, use a `TestScoping` trait:
-
-```swift
-@Suite(.tags(.database))
-struct DatabaseTests {
-    let db: TestDatabase
-
-    init() async throws {
-        db = try await TestDatabase.createTemporary()
-    }
-
-    // deinit works for synchronous cleanup (struct suites only use init)
-    // For async teardown, use TestScoping trait instead
-
-    @Test func insertRecord() async throws {
-        try await db.insert(Record(id: 1, name: "Test"))
-        let count = try await db.count()
-        #expect(count == 1)
-    }
-}
-```
-
-### Warning-Severity Issues
-
-Record issues that surface in test output but don't fail the test. Use for performance regressions, deprecated paths, or non-critical checks you want to track.
-
-```swift
-Issue.record(
-    "Processing took \(elapsed)s — exceeds 2s target",
-    severity: .warning
-)
-```
-
-## Async Testing Patterns
-
-### Testing Async Functions
-
-`@Test` functions can be `async` and `throws` directly:
-
-```swift
-@Test func fetchUserProfile() async throws {
-    let service = UserService(client: MockHTTPClient())
-    let user = try await service.fetchProfile(id: 42)
-    #expect(user.name == "Alice")
-}
-```
-
-### Testing Actor-Isolated Code
-
-Access actor-isolated state with `await`:
-
-```swift
-actor Counter {
-    private(set) var value = 0
-    func increment() { value += 1 }
-}
-
-@Test func counterIncrements() async {
-    let counter = Counter()
-    await counter.increment()
-    await counter.increment()
-    let value = await counter.value
-    #expect(value == 2)
-}
-```
-
-### Timeout for Hanging Tests
-
-Use `.timeLimit` to prevent tests from hanging indefinitely:
-
-```swift
-@Test(.timeLimit(.seconds(5)))
-func networkCallCompletes() async throws {
-    let result = try await api.fetchData()
-    #expect(result.isEmpty == false)
-}
-```
-
-If the test exceeds the time limit, it fails immediately with a clear timeout diagnostic.
-
-### Confirmation (Replacing XCTestExpectation)
-
-`confirmation` replaces `XCTestExpectation` / `fulfill()` / `waitForExpectations`. It verifies that an event occurs the expected number of times:
-
-```swift
-@Test func notificationPosted() async throws {
-    // Expects the closure to call confirm() exactly once
-    try await confirmation("UserDidLogin posted") { confirm in
-        let center = NotificationCenter.default
-        let observer = center.addObserver(
-            forName: .userDidLogin, object: nil, queue: .main
-        ) { _ in
-            confirm()
-        }
-        await loginService.login(user: "test", password: "pass")
-        center.removeObserver(observer)
-    }
-}
-
-// Expect multiple confirmations
-@Test func batchProcessing() async throws {
-    try await confirmation("Items processed", expectedCount: 3) { confirm in
-        processor.onItemComplete = { _ in confirm() }
-        await processor.process(items: [a, b, c])
-    }
-}
-```
-
-### Programmatic Cancellation
-
-Stop a test without marking it passed or failed. The test is recorded as "cancelled" — distinct from failure or a known issue.
-
-```swift
-@Test func requiresNetwork() throws {
-    guard NetworkMonitor.shared.isConnected else {
-        try Test.cancel("No network — skipping integration test")
-    }
-    // ... test continues if connected
-}
-```
-
-## Traits In Depth
-
-### Conditional Traits
-
-```swift
-// Enable only on CI
-@Test(.enabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
-func integrationTest() async throws { ... }
-
-// Disable with a reason
-@Test(.disabled("Blocked by #123 -- server migration"))
-func brokenEndpoint() async throws { ... }
-
-// Bug reference -- links test to an issue tracker
-@Test(.bug("https://github.com/org/repo/issues/42", "Intermittent timeout"))
-func flakyNetworkTest() async throws { ... }
-```
-
-### Time Limits
-
-```swift
-@Test(.timeLimit(.minutes(2)))
-func longRunningImport() async throws {
-    try await importer.importLargeDataset()
-}
-
-// Apply time limit to entire suite
-@Suite(.timeLimit(.seconds(30)))
-struct FastTests {
-    @Test func quick1() { ... }
-    @Test func quick2() { ... }
-}
-```
-
-### Custom Trait Definitions
-
-Create reusable traits for common test configurations:
-
-```swift
-struct DatabaseTrait: TestTrait, SuiteTrait, TestScoping {
-    func provideScope(
-        for test: Test,
-        testCase: Test.Case?,
-        performing function: @Sendable () async throws -> Void
-    ) async throws {
-        let db = try await TestDatabase.setUp()
-        defer { Task { await db.tearDown() } }
-        try await function()
-    }
-}
-
-extension Trait where Self == DatabaseTrait {
-    static var database: Self { .init() }
-}
-
-// Usage: any test with .database trait gets a fresh database
-@Test(.database)
-func insertUser() async throws { ... }
-```
+See [references/testing-patterns.md](references/testing-patterns.md) for parameterized tests, tags and suites, async testing, traits, and execution-model details.
 
 ## Test Attachments
 
@@ -438,7 +140,7 @@ Attach diagnostic data to test results for debugging failures. See [references/t
 ```swift
 @Test func generateReport() async throws {
     let report = try generateReport()
-    Attachment(report.data, named: "report.json").record()
+    Attachment.record(report.data, named: "report.json")
     #expect(report.isValid)
 }
 ```
@@ -451,7 +153,7 @@ import UIKit
 
 @Test func renderedChart() async throws {
     let image = renderer.image { ctx in chartView.drawHierarchy(in: bounds, afterScreenUpdates: true) }
-    Attachment(image, named: "chart.png").record()
+    Attachment.record(image, named: "chart.png")
 }
 ```
 
@@ -478,6 +180,8 @@ Test code that calls `exit()`, `fatalError()`, or `preconditionFailure()`. See [
 7. **Not testing cancellation.** If code supports `Task` cancellation, verify it cancels cleanly.
 8. **Mixing XCTest and Swift Testing in one file.** Keep them in separate files.
 9. **Non-Sendable test helpers shared across tests.** Ensure test helper types are Sendable when shared across concurrent test cases. Annotate MainActor-dependent test code with `@MainActor`.
+10. **Assuming tests run in declaration order.** Swift Testing runs in parallel by default; use `.serialized` only when exclusive execution is required.
+11. **Using `.serialized` to express workflow steps.** Serialized execution does not make one test feed another; keep dependent steps in one test.
 
 ## Review Checklist
 
@@ -489,6 +193,8 @@ Test code that calls `exit()`, `fatalError()`, or `preconditionFailure()`. See [
 - [ ] Tags applied for filtering (`.critical`, `.slow`)
 - [ ] Mocks conform to protocols, not subclass concrete types
 - [ ] No shared mutable state between tests
+- [ ] Tests do not rely on declaration order or shared suite instances
+- [ ] `.serialized` used only for truly exclusive state, not to model workflow sequencing
 - [ ] Cancellation tested for cancellable async operations
 
 ## References

@@ -8,6 +8,7 @@ A comprehensive mapping of deprecated-to-modern SwiftUI and iOS APIs from iOS 15
 - ObservableObject / @Published / @StateObject to @Observable / @State
 - @ObservedObject to let / @Bindable
 - @EnvironmentObject to @Environment
+- foregroundColor to foregroundStyle
 - .onChange single-value to two-value
 - ActionSheet to confirmationDialog
 - Alert (Legacy) to modern .alert
@@ -319,6 +320,45 @@ struct ContentView: View {
     }
 }
 ```
+
+---
+
+## foregroundColor(_:) to foregroundStyle(_:)
+
+`foregroundColor(_:)` was deprecated in iOS 17. Its replacement, `foregroundStyle(_:)`, accepts any `ShapeStyle` -- not just `Color` -- enabling gradients, hierarchical styles, and materials directly.
+
+### Before (Deprecated)
+
+```swift
+Text("Hello")
+    .foregroundColor(.red)
+
+Text("Secondary")
+    .foregroundColor(.secondary)
+```
+
+### After (Modern)
+
+```swift
+Text("Hello")
+    .foregroundStyle(.red)
+
+Text("Secondary")
+    .foregroundStyle(.secondary)
+
+// Gradient -- not possible with foregroundColor
+Text("Gradient")
+    .foregroundStyle(
+        .linearGradient(colors: [.blue, .purple],
+                        startPoint: .leading, endPoint: .trailing)
+    )
+```
+
+### Migration Notes
+
+`foregroundStyle(_:)` is a drop-in replacement when passing a `Color`. The broader `ShapeStyle` conformance also accepts gradients, `.tint`, `.selection`, and hierarchical styles (`.primary`, `.secondary`, `.tertiary`, `.quaternary`). Multi-level variants `foregroundStyle(_:_:)` and `foregroundStyle(_:_:_:)` set hierarchical styles for child content in one call.
+
+**Not to be confused with** `NSAttributedString.Key.foregroundColor` -- that is a UIKit/Foundation attributed-string key used for Core Text, `NSAttributedString`, and PDF rendering. It is not deprecated and has no SwiftUI equivalent.
 
 ---
 
@@ -963,10 +1003,13 @@ func display(_ view: some View) { ... }
 @State private var selectedItem: Item?
 @State private var showingSheet = false
 
-.onTapGesture {
+Button {
     selectedItem = item
     showingSheet = true
+} label: {
+    ItemRow(item: item)
 }
+.buttonStyle(.plain)
 .sheet(isPresented: $showingSheet) {
     if let item = selectedItem {
         DetailView(item: item)
@@ -979,9 +1022,12 @@ func display(_ view: some View) { ... }
 ```swift
 @State private var selectedItem: Item?
 
-.onTapGesture {
+Button {
     selectedItem = item
+} label: {
+    ItemRow(item: item)
 }
+.buttonStyle(.plain)
 .sheet(item: $selectedItem) { item in
     DetailView(item: item)
 }
@@ -1095,3 +1141,102 @@ Constant-range `ForEach(0..<n)` is only safe when the range never changes. For d
 ### Migration Notes
 
 `.navigationBarLeading` and `.navigationBarTrailing` were renamed to `.topBarLeading` and `.topBarTrailing` (iOS 16+). The new names work consistently across NavigationStack and NavigationSplitView contexts. Prefer the new names for cross-platform consistency.
+
+---
+
+## cornerRadius to clipShape(.rect(cornerRadius:))
+
+`.cornerRadius(_:)` was deprecated in iOS 17.
+
+### Before (Deprecated)
+
+```swift
+RoundedRectangle(cornerRadius: 12)
+    .cornerRadius(12)
+
+Image("photo")
+    .cornerRadius(8)
+```
+
+### After (Modern)
+
+```swift
+RoundedRectangle(cornerRadius: 12)
+    .clipShape(.rect(cornerRadius: 12))
+
+Image("photo")
+    .clipShape(.rect(cornerRadius: 8))
+```
+
+### Migration Notes
+
+`clipShape(.rect(cornerRadius:))` uses `RoundedRectangle` under the hood and also supports `cornerRadii` for per-corner control (iOS 16+):
+
+```swift
+.clipShape(.rect(cornerRadii: .init(topLeading: 12, bottomTrailing: 12)))
+```
+
+---
+
+## tabItem to Tab (iOS 18+)
+
+The `tabItem` modifier approach was superseded by the `Tab` type inside `TabView` (iOS 18+).
+
+### Before (Legacy)
+
+```swift
+TabView {
+    HomeView()
+        .tabItem {
+            Label("Home", systemImage: "house")
+        }
+    SettingsView()
+        .tabItem {
+            Label("Settings", systemImage: "gear")
+        }
+}
+```
+
+### After (Modern — iOS 18+)
+
+```swift
+TabView {
+    Tab("Home", systemImage: "house") {
+        HomeView()
+    }
+    Tab("Settings", systemImage: "gear") {
+        SettingsView()
+    }
+}
+```
+
+### Migration Notes
+
+`Tab` provides a cleaner API and is required for the new tab sidebar on iPadOS 18+. The `tabItem` modifier still works but does not support the sidebar presentation. Use `Tab` with a `value` parameter and `@State` selection for programmatic tab switching. `TabSection` groups tabs in the sidebar.
+
+---
+
+## scrollIndicators(.hidden) Replaces showsIndicators Parameter
+
+The `showsIndicators` parameter on `ScrollView` is available but the `scrollIndicators` modifier (iOS 16+) is preferred for consistency.
+
+### Before
+
+```swift
+ScrollView(.vertical, showsIndicators: false) {
+    content
+}
+```
+
+### After (Modern)
+
+```swift
+ScrollView {
+    content
+}
+.scrollIndicators(.hidden)
+```
+
+### Migration Notes
+
+`.scrollIndicators(_:axes:)` accepts `.automatic`, `.visible`, `.hidden`, and `.never`. It also works on `List` and `TextEditor`. The `axes` parameter lets you control horizontal and vertical indicators independently.

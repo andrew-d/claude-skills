@@ -14,7 +14,9 @@ Default to Model-View (MV) in SwiftUI. Views are lightweight state expressions; 
 - [Core Principles](#core-principles)
 - [Why Not MVVM](#why-not-mvvm)
 - [MV Pattern in Practice](#mv-pattern-in-practice)
-- [When a View Model Already Exists](#when-a-view-model-already-exists)
+- [When a ViewModel Already Exists](#when-a-viewmodel-already-exists)
+- [When a New ViewModel Is Justified](#when-a-new-viewmodel-is-justified)
+- [Environment vs. Initializer Injection](#environment-vs-initializer-injection)
 - [Testing Strategy](#testing-strategy)
 - [Source](#source)
 
@@ -148,11 +150,11 @@ struct BookListView: View {
 
 Forcing a ViewModel here means manual fetching, manual refresh, and boilerplate everywhere.
 
-### When a View Model Already Exists
+### When a ViewModel Already Exists
 
-If a view model exists in the codebase:
+If a ViewModel exists in the codebase:
 - Make it non-optional when possible
-- Pass dependencies via `init`, then forward them into the view model in the view's `init`
+- Pass dependencies via `init`, then forward them into the ViewModel in the view's `init`
 - Store as `@State` in the root view that owns it
 - Avoid `bootstrapIfNeeded` patterns
 
@@ -163,6 +165,76 @@ init(dependency: Dependency) {
     _viewModel = State(initialValue: SomeViewModel(dependency: dependency))
 }
 ```
+
+Modern `@Observable` ViewModel with child-view binding:
+
+```swift
+@MainActor @Observable final class ProfileViewModel {
+    var name: String = ""
+    var isSaving: Bool = false
+
+    private let client: ProfileClient
+
+    init(client: ProfileClient) {
+        self.client = client
+    }
+
+    func save() async throws {
+        isSaving = true
+        defer { isSaving = false }
+        try await client.update(name: name)
+    }
+}
+
+// Owner view creates via @State
+struct ProfileScreen: View {
+    @State private var viewModel: ProfileViewModel
+
+    init(client: ProfileClient) {
+        _viewModel = State(initialValue: ProfileViewModel(client: client))
+    }
+
+    var body: some View {
+        ProfileForm(viewModel: viewModel)
+    }
+}
+
+// Child view receives and binds
+struct ProfileForm: View {
+    @Bindable var viewModel: ProfileViewModel
+
+    var body: some View {
+        TextField("Name", text: $viewModel.name)
+        Button("Save") { Task { try? await viewModel.save() } }
+            .disabled(viewModel.isSaving)
+    }
+}
+```
+
+### When a New ViewModel Is Justified
+
+The MV pattern is the default. Introduce a ViewModel only when the view would be hard to read or test without one:
+
+- **Multi-step workflows** — onboarding, checkout, or wizard flows where each step mutates shared draft state
+- **Non-trivial business logic** — validation chains, derived state from multiple sources, or transformation pipelines that don't belong in a lightweight client
+- **Coordinated async streams** — the view orchestrates multiple publishers or `AsyncSequence` values with interdependent state transitions
+- **Existing test surface** — the codebase already tests against a ViewModel interface and rewriting to MV would be high cost, low reward
+
+The bar is "this view would be hard to read and test without a ViewModel," not "I'm used to MVVM."
+
+### Environment vs. Initializer Injection
+
+**Use `@Environment` when** the dependency is shared across many views at different depths. Threading it through every intermediate initializer adds noise:
+- App-wide services: auth, network client, theme, router
+- SwiftData `ModelContext`
+- Feature-scoped stores injected at a navigation root
+
+**Use initializer parameters when** the data is specific to this view instance. Makes the view's requirements explicit and keeps previews simple:
+- The selected item, filter mode, or configuration
+- Parent-to-child data that only one view needs
+- Values known at call site that don't change
+
+Rule of thumb: if three or more intermediate views would need to accept and forward a parameter just to reach a deeply nested consumer, move it to the environment.
 
 ### Testing Strategy
 

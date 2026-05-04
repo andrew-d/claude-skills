@@ -2,13 +2,13 @@
 
 [![License: PolyForm Perimeter](https://img.shields.io/badge/License-PolyForm%20Perimeter%201.0.0-blue.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/dpearson2699/swift-ios-skills)](https://github.com/dpearson2699/swift-ios-skills/stargazers)
-[![Swift 6.3](https://img.shields.io/badge/Swift-6.3-F05138.svg)](https://swift.org)
+[![Swift 6.3](https://img.shields.io/badge/Swift-6.3-F05138.svg?logo=swift&logoColor=white)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20iPadOS%20%7C%20macOS-000000.svg?logo=apple)](https://developer.apple.com)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-d97757.svg?logo=anthropic)](https://claude.ai/code)
 [![OpenAI Codex](https://img.shields.io/badge/OpenAI%20Codex-compatible-10A37F.svg?logo=data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTIyLjI4MTkgOS44MjExYTUuOTg0NyA1Ljk4NDcgMCAwIDAtLjUxNTctNC45MTA4IDYuMDQ2MiA2LjA0NjIgMCAwIDAtNi41MDk4LTIuOUE2LjA2NTEgNi4wNjUxIDAgMCAwIDQuOTgwNyA0LjE4MThhNS45ODQ3IDUuOTg0NyAwIDAgMC0zLjk5NzcgMi45IDYuMDQ2MiA2LjA0NjIgMCAwIDAgLjc0MjcgNy4wOTY2IDUuOTggNS45OCAwIDAgMCAuNTExIDQuOTEwNyA2LjA1MSA2LjA1MSAwIDAgMCA2LjUxNDYgMi45MDAxQTUuOTg0NyA1Ljk4NDcgMCAwIDAgMTMuMjU5OSAyNGE2LjA1NTcgNi4wNTU3IDAgMCAwIDUuNzcxOC00LjIwNTggNS45ODk0IDUuOTg5NCAwIDAgMCAzLjk5NzctMi45MDAxIDYuMDU1NyA2LjA1NTcgMCAwIDAtLjc0NzUtNy4wNzI5em0tOS4wMjIgMTIuNjA4MWE0LjQ3NTUgNC40NzU1IDAgMCAxLTIuODc2NC0xLjA0MDhsLjE0MTktLjA4MDQgNC43NzgzLTIuNzU4MmEuNzk0OC43OTQ4IDAgMCAwIC4zOTI3LS42ODEzdi02LjczNjlsMi4wMiAxLjE2ODZhLjA3MS4wNzEgMCAwIDEgLjAzOC4wNTJ2NS41ODI2YTQuNTA0IDQuNTA0IDAgMCAxLTQuNDk0NSA0LjQ5NDR6bS05LjY2MDctNC4xMjU0YTQuNDcwOCA0LjQ3MDggMCAwIDEtLjUzNDYtMy4wMTM3bC4xNDIuMDg1MiA0Ljc4MyAyLjc1ODJhLjc3MTIuNzcxMiAwIDAgMCAuNzgwNiAwbDUuODQyOC0zLjM2ODV2Mi4zMzI0YS4wODA0LjA4MDQgMCAwIDEtLjAzMzIuMDYxNUw5Ljc0IDE5Ljk1MDJhNC40OTkyIDQuNDk5MiAwIDAgMS02LjE0MDgtMS42NDY0ek0yLjM0MDggNy44OTU2YTQuNDg1IDQuNDg1IDAgMCAxIDIuMzY1NS0xLjk3MjhWMTEuNmEuNzY2NC43NjY0IDAgMCAwIC4zODc5LjY3NjVsNS44MTQ0IDMuMzU0My0yLjAyMDEgMS4xNjg1YS4wNzU3LjA3NTcgMCAwIDEtLjA3MSAwbC00LjgzMDMtMi43ODY1QTQuNTA0IDQuNTA0IDAgMCAxIDIuMzQwOCA3Ljg3MnptMTYuNTk2MyAzLjg1NThMMTMuMTAzOCA4LjM2NCAxNS4xMTkyIDcuMmEuMDc1Ny4wNzU3IDAgMCAxIC4wNzEgMGw0LjgzMDMgMi43OTEzYTQuNDk0NCA0LjQ5NDQgMCAwIDEtLjY3NjUgOC4xMDQydi01LjY3NzJhLjc5Ljc5IDAgMCAwLS40MDctLjY2N3ptMi4wMTA3LTMuMDIzMWwtLjE0Mi0uMDg1Mi00Ljc3MzUtMi43ODE4YS43NzU5Ljc3NTkgMCAwIDAtLjc4NTQgMEw5LjQwOSA5LjIyOTdWNi44OTc0YS4wNjYyLjA2NjIgMCAwIDEgLjAyODQtLjA2MTVsNC44MzAzLTIuNzg2NmE0LjQ5OTIgNC40OTkyIDAgMCAxIDYuNjgwMiA0LjY2ek04LjMwNjUgMTIuODYzbC0yLjAyLTEuMTYzOGEuMDgwNC4wODA0IDAgMCAxLS4wMzgtLjA1NjdWNi4wNzQyYTQuNDk5MiA0LjQ5OTIgMCAwIDEgNy4zNzU3LTMuNDUzN2wtLjE0Mi4wODA1TDguNzA0IDUuNDU5YS43OTQ4Ljc5NDggMCAwIDAtLjM5MjcuNjgxM3ptMS4wOTc2LTIuMzY1NGwyLjYwMi0xLjQ5OTggMi42MDY5IDEuNDk5OHYyLjk5OTRsLTIuNTk3NCAxLjQ5OTctMi42MDY3LTEuNDk5N1oiLz48L3N2Zz4=)](https://developers.openai.com/codex)
 [![Agent Skills](https://img.shields.io/badge/Agent%20Skills-standard-green.svg?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE2IDAuNUwyOS40MjM0IDguMjVWMjMuNzVMMTYgMzEuNUwyLjU3NjYxIDIzLjc1VjguMjVMMTYgMC41WiBNMTYgNUwyNS41MjYzIDEwLjVWMjEuNUwxNiAyN0w2LjQ3MzcyIDIxLjVWMTAuNUwxNiA1WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4K)](https://agentskills.io)
 
-76 agent skills optimized for **iOS 26+** development with Swift 6.3 and modern Apple frameworks. All code examples, patterns, and guidance target the latest APIs -- Liquid Glass, approachable concurrency, Foundation Models, StoreKit 2, SwiftData, async/await URLSession, and more. No deprecated patterns.
+84 agent skills optimized for **iOS 26+** development with Swift 6.3 and modern Apple frameworks. All code examples, patterns, and guidance target the latest APIs -- Liquid Glass, approachable concurrency, Foundation Models, StoreKit 2, SwiftData, async/await URLSession, and more. No deprecated patterns.
 
 Compatible with [Claude Code](https://claude.ai/code), [OpenAI Codex](https://developers.openai.com/codex), [Cursor](https://cursor.com), [GitHub Copilot](https://github.com/features/copilot), and [40+ other agents](https://skills.sh). Follows the open [Agent Skills](https://agentskills.io) standard.
 
@@ -59,7 +59,7 @@ Install everything for any coding agent:
 npx skills add dpearson2699/swift-ios-skills --all
 ```
 
-Use `--all` when you want the full set of 76 skills installed automatically for any coding agent.
+Use `--all` when you want the full set of 84 skills installed automatically for any coding agent.
 
 Install specific skills directly:
 
@@ -136,14 +136,14 @@ $skill-installer install https://github.com/dpearson2699/swift-ios-skills/tree/m
 
 | Plugin | Skills included |
 |--------|----------------|
-| **all-ios-skills** | All 76 skills |
-| **apple-kit-skills** | 39 Apple Kit framework skills plus CarPlay |
-| **swiftui-skills** | swiftui-animation, swiftui-gestures, swiftui-layout-components, swiftui-liquid-glass, swiftui-navigation, swiftui-patterns, swiftui-performance, swiftui-uikit-interop, swiftui-webkit |
-| **swift-core-skills** | swift-codable, swift-charts, swift-concurrency, swift-language, swift-testing, swiftdata |
+| **all-ios-skills** | All 84 skills |
+| **apple-kit-skills** | 39 skills spanning Apple Kit frameworks plus CarPlay |
+| **swiftui-skills** | focus-engine, swiftui-animation, swiftui-gestures, swiftui-layout-components, swiftui-liquid-glass, swiftui-navigation, swiftui-patterns, swiftui-performance, swiftui-uikit-interop, swiftui-webkit |
+| **swift-core-skills** | core-data, swift-api-design-guidelines, swift-architecture, swift-codable, swift-charts, swift-concurrency, swift-formatstyle, swift-language, swift-testing, swiftdata |
 | **ios-app-framework-skills** | activitykit, adattributionkit, alarmkit, app-clips, app-intents, avkit, carplay, mapkit, paperkit, pdfkit, photokit, push-notifications, storekit, tipkit, widgetkit |
 | **ios-data-framework-skills** | cloudkit, contacts-framework, eventkit, financekit, healthkit, musickit, passkit, weatherkit |
 | **ios-ai-ml-skills** | apple-on-device-ai, coreml, natural-language, speech-recognition, vision-framework |
-| **ios-engineering-skills** | app-store-review, authentication, background-processing, cryptokit, debugging-instruments, device-integrity, ios-accessibility, ios-localization, ios-networking, ios-security, metrickit |
+| **ios-engineering-skills** | app-store-optimization, app-store-review, authentication, background-processing, cryptokit, debugging-instruments, device-integrity, ios-accessibility, ios-localization, ios-networking, swift-security, swiftlint, ios-simulator, metrickit |
 | **ios-hardware-skills** | accessorysetupkit, core-bluetooth, core-motion, core-nfc, dockkit, pencilkit, realitykit, sensorkit |
 | **ios-platform-skills** | appmigrationkit, audioaccessorykit, browserenginekit, callkit, cryptotokenkit, energykit, homekit, permissionkit, relevancekit, shareplay-activities |
 | **ios-gaming-skills** | gamekit, scenekit, spritekit, tabletopkit |
@@ -154,12 +154,13 @@ $skill-installer install https://github.com/dpearson2699/swift-ios-skills/tree/m
 
 | Skill | What it covers |
 |-------|---------------|
+| [focus-engine](skills/focus-engine/) | @FocusState, defaultFocus, focusSection, focused scene values, focus restoration, UIFocusGuide |
 | [swiftui-animation](skills/swiftui-animation/) | Spring animations, PhaseAnimator, KeyframeAnimator, matchedGeometryEffect, SF Symbols |
 | [swiftui-gestures](skills/swiftui-gestures/) | Tap, drag, magnify, rotate, long press, simultaneous and sequential gestures |
 | [swiftui-layout-components](skills/swiftui-layout-components/) | Grid, LazyVGrid, Layout protocol, ViewThatFits, custom layouts |
 | [swiftui-liquid-glass](skills/swiftui-liquid-glass/) | iOS 26 Liquid Glass, glassEffect, GlassEffectContainer, morphing transitions |
 | [swiftui-navigation](skills/swiftui-navigation/) | NavigationStack, NavigationSplitView, programmatic navigation, deep linking |
-| [swiftui-patterns](skills/swiftui-patterns/) | @Observable, NavigationStack, view composition, sheets, TabView, MV-pattern architecture |
+| [swiftui-patterns](skills/swiftui-patterns/) | @Observable, state ownership, environment wiring, view composition, async loading, MV-pattern architecture |
 | [swiftui-performance](skills/swiftui-performance/) | Rendering performance, view update optimization, layout thrash, Instruments profiling |
 | [swiftui-uikit-interop](skills/swiftui-uikit-interop/) | UIViewRepresentable, UIHostingController, Coordinator, incremental UIKit-to-SwiftUI migration |
 | [swiftui-webkit](skills/swiftui-webkit/) | WebView, WebPage, navigation policies, JavaScript calls, local content, custom URL schemes |
@@ -168,11 +169,15 @@ $skill-installer install https://github.com/dpearson2699/swift-ios-skills/tree/m
 
 | Skill | What it covers |
 |-------|---------------|
+| [swift-api-design-guidelines](skills/swift-api-design-guidelines/) | Swift API Design Guidelines -- argument labels, mutating/nonmutating pairs, documentation comments, naming conventions |
+| [swift-architecture](skills/swift-architecture/) | Architecture patterns: MV (@Observable), MVVM, MVI, TCA, Clean Architecture, Coordinator, decision framework |
 | [swift-codable](skills/swift-codable/) | Swift Codable, JSONDecoder, JSONEncoder, CodingKeys, custom decoding, nested JSON |
 | [swift-charts](skills/swift-charts/) | Bar, line, area, pie, donut charts, scrolling, selection, annotations |
 | [swift-concurrency](skills/swift-concurrency/) | Swift 6.2 concurrency, Sendable, actors, structured concurrency, data-race safety |
+| [swift-formatstyle](skills/swift-formatstyle/) | FormatStyle protocol, number/currency/date/duration/measurement formatting, custom styles |
 | [swift-language](skills/swift-language/) | Swift 6.3 features, macros, result builders, property wrappers |
 | [swift-testing](skills/swift-testing/) | Swift Testing framework, @Test, @Suite, #expect, parameterized tests, mocking |
+| [core-data](skills/core-data/) | Core Data persistence, NSPersistentContainer, NSFetchedResultsController, batch operations, staged migration |
 | [swiftdata](skills/swiftdata/) | @Model, @Query, #Predicate, ModelContainer, migrations, CloudKit sync, @ModelActor |
 
 ### App Experience Frameworks
@@ -222,6 +227,7 @@ $skill-installer install https://github.com/dpearson2699/swift-ios-skills/tree/m
 
 | Skill | What it covers |
 |-------|---------------|
+| [app-store-optimization](skills/app-store-optimization/) | ASO keyword strategy, description writing, screenshot optimization, Custom Product Pages, A/B testing |
 | [app-store-review](skills/app-store-review/) | App Review guidelines, rejection prevention, privacy manifests, ATT, HIG compliance |
 | [authentication](skills/authentication/) | Sign in with Apple, ASAuthorizationController, passkeys, biometric auth (LAContext), credential management |
 | [background-processing](skills/background-processing/) | BGTaskScheduler, background refresh, URLSession background transfers |
@@ -231,8 +237,10 @@ $skill-installer install https://github.com/dpearson2699/swift-ios-skills/tree/m
 | [ios-accessibility](skills/ios-accessibility/) | VoiceOver, Dynamic Type, custom rotors, accessibility focus, assistive-technology support |
 | [ios-localization](skills/ios-localization/) | String Catalogs, pluralization, FormatStyle, right-to-left layout |
 | [ios-networking](skills/ios-networking/) | URLSession async/await, REST APIs, downloads/uploads, WebSockets, pagination, retry, caching |
-| [ios-security](skills/ios-security/) | Keychain, Secure Enclave, ATS, certificate pinning, data protection, biometric Keychain access |
+| [swift-security](skills/swift-security/) | Keychain Services, CryptoKit symmetric/asymmetric, biometric authentication, Secure Enclave, certificate trust, credential storage, OWASP compliance · *Based on [ivan-magda/swift-security-skill](https://github.com/ivan-magda/swift-security-skill)* |
+| [ios-simulator](skills/ios-simulator/) | xcrun simctl commands, device lifecycle, push/location/privacy simulation, log streaming, simulator limitations |
 | [metrickit](skills/metrickit/) | MXMetricManager, hang diagnostics, crash reports, power metrics |
+| [swiftlint](skills/swiftlint/) | SwiftLint setup, .swiftlint.yml, build tool plugin, rule selection, baselines, suppressions, CI integration |
 
 ### Hardware & Device Integration
 
@@ -339,6 +347,12 @@ To upgrade Claude Code bundles, reinstall the bundles you use (old skill paths w
 If these skills save you time or improve your workflow, you can support ongoing maintenance through [GitHub Sponsors](https://github.com/sponsors/dpearson2699).
 
 Support helps keep the collection current with new Apple releases, evolving framework APIs, updated examples, and compatibility work across Claude Code, Codex, Cursor, Copilot, and other agents.
+
+## Sponsors
+
+Thanks to the following people for supporting this project:
+
+<a href="https://github.com/AnthonyJrWTF"><img src="https://github.com/AnthonyJrWTF.png" width="60" alt="Anthony Jr." style="border-radius: 50%;"></a>
 
 ## License
 

@@ -1,7 +1,7 @@
 {
   "name": "swift-core-skills",
-  "version": "3.1.0",
-  "description": "Core Swift language features, concurrency, testing, SwiftData, Charts, and Codable",
+  "version": "3.4.0",
+  "description": "Core Swift language features, concurrency, API design guidelines, testing, SwiftData, Core Data, Charts, Codable, FormatStyle, and architecture patterns",
   "author": {
     "name": "Derek Pearson"
   }
