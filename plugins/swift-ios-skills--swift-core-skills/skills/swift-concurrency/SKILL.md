@@ -412,12 +412,11 @@ and a decision guide for choosing locks vs actors.
 
 ## References
 
-- See [references/concurrency-patterns.md](references/concurrency-patterns.md) for detailed approachable concurrency patterns,
-  patterns, and migration examples.
-- See [references/approachable-concurrency.md](references/approachable-concurrency.md) for the approachable concurrency
-  mode quick-reference guide.
-- See [references/swiftui-concurrency.md](references/swiftui-concurrency.md) for SwiftUI-specific concurrency
-  guidance.
-- See [references/synchronization-primitives.md](references/synchronization-primitives.md) for Mutex, OSAllocatedUnfairLock,
-  and guidance on choosing locks vs actors.
+- [references/concurrency-patterns.md](references/concurrency-patterns.md) — detailed concurrency patterns and migration examples
+- [references/approachable-concurrency.md](references/approachable-concurrency.md) — approachable concurrency mode quick-reference
+- [references/swiftui-concurrency.md](references/swiftui-concurrency.md) — SwiftUI-specific concurrency guidance
+- [references/synchronization-primitives.md](references/synchronization-primitives.md) — Mutex, OSAllocatedUnfairLock, locks vs actors
+- [references/bridging-interop.md](references/bridging-interop.md) — checked continuations, delegate bridging, GCD migration table
+- [references/diagnostics.md](references/diagnostics.md) — compiler diagnostic → fix reference, strict concurrency adoption
+- [references/async-algorithms.md](references/async-algorithms.md) — swift-async-algorithms: debounce, throttle, merge, combineLatest, chunks
 

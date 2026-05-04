@@ -5,6 +5,7 @@
 - [Intent](#intent)
 - [Core patterns](#core-patterns)
 - [Example: vertical custom feed](#example-vertical-custom-feed)
+- [ScrollPosition capabilities](#scrollposition-capabilities)
 - [Example: horizontal chips](#example-horizontal-chips)
 - [Example: adaptive grid](#example-adaptive-grid)
 - [Design choices to keep](#design-choices-to-keep)
@@ -20,7 +21,7 @@ Use `ScrollView` with `LazyVStack`, `LazyHStack`, or `LazyVGrid` when you need c
 - Prefer `ScrollView` + `LazyVStack` for chat-like or custom feed layouts.
 - Use `ScrollView(.horizontal)` + `LazyHStack` for chips, tags, avatars, and media strips.
 - Use `LazyVGrid` for icon/media grids; prefer adaptive columns when possible.
-- Use `ScrollViewReader` for scroll-to-top/bottom and anchor-based jumps.
+- Use `ScrollPosition` for programmatic scrolling: scroll-to-id, scroll-to-edge, and point-based offsets.
 - Use `safeAreaInset(edge:)` for input bars that should stick above the keyboard.
 
 ## Example: vertical custom feed
@@ -28,32 +29,76 @@ Use `ScrollView` with `LazyVStack`, `LazyHStack`, or `LazyVGrid` when you need c
 ```swift
 @MainActor
 struct ConversationView: View {
-  private enum Constants { static let bottomAnchor = "bottom" }
-  @State private var scrollProxy: ScrollViewProxy?
+  @State private var scrollPosition = ScrollPosition(edge: .bottom)
 
   var body: some View {
-    ScrollViewReader { proxy in
-      ScrollView {
-        LazyVStack {
-          ForEach(messages) { message in
-            MessageRow(message: message)
-              .id(message.id)
-          }
-          Color.clear.frame(height: 1).id(Constants.bottomAnchor)
-        }
-        .padding(.horizontal, .layoutPadding)
-      }
-      .safeAreaInset(edge: .bottom) {
-        MessageInputBar()
-      }
-      .onAppear {
-        scrollProxy = proxy
-        withAnimation {
-          proxy.scrollTo(Constants.bottomAnchor, anchor: .bottom)
+    ScrollView {
+      LazyVStack {
+        ForEach(messages) { message in
+          MessageRow(message: message)
         }
       }
+      .scrollTargetLayout()
+      .padding(.horizontal, .layoutPadding)
+    }
+    .scrollPosition($scrollPosition)
+    .safeAreaInset(edge: .bottom) {
+      MessageInputBar()
+    }
+    .onChange(of: messages.last?.id) {
+      withAnimation { scrollPosition.scrollTo(edge: .bottom) }
     }
   }
+}
+```
+
+## ScrollPosition capabilities
+
+`ScrollPosition` (iOS 18+) replaces `ScrollViewReader` for programmatic scrolling. It is declarative, supports bidirectional position tracking, and does not require a closure wrapper.
+
+**Setup:** Declare state and attach to the scroll view. Apply `.scrollTargetLayout()` to the inner layout container so SwiftUI can track individual view identities.
+
+```swift
+@State private var scrollPosition = ScrollPosition(idType: Message.ID.self)
+
+ScrollView {
+    LazyVStack {
+        ForEach(messages) { message in
+            MessageRow(message: message)
+        }
+    }
+    .scrollTargetLayout()
+}
+.scrollPosition($scrollPosition)
+```
+
+**Scroll to a specific item:**
+
+```swift
+scrollPosition.scrollTo(id: message.id, anchor: .top)
+```
+
+**Scroll to an edge:**
+
+```swift
+scrollPosition.scrollTo(edge: .bottom)
+```
+
+**Read the current position:**
+
+```swift
+if let currentID = scrollPosition.viewID(type: Message.ID.self) {
+    // The view with this ID is currently at the scroll anchor
+}
+```
+
+**Detect user-initiated scrolls:**
+
+```swift
+.onChange(of: scrollPosition.isPositionedByUser) { _, byUser in
+    if byUser {
+        // User scrolled manually -- show "scroll to bottom" button
+    }
 }
 ```
 
@@ -61,7 +106,7 @@ struct ConversationView: View {
 
 ```swift
 ScrollView(.horizontal, showsIndicators: false) {
-  LazyHStack(spacing: 8) {
+  LazyHStack {
     ForEach(chips) { chip in
       ChipView(chip: chip)
     }
@@ -75,12 +120,12 @@ ScrollView(.horizontal, showsIndicators: false) {
 let columns = [GridItem(.adaptive(minimum: 120))]
 
 ScrollView {
-  LazyVGrid(columns: columns, spacing: 8) {
+  LazyVGrid(columns: columns) {
     ForEach(items) { item in
       GridItemView(item: item)
     }
   }
-  .padding(8)
+  .padding()
 }
 ```
 
@@ -88,7 +133,7 @@ ScrollView {
 
 - Use `Lazy*` stacks when item counts are large or unknown.
 - Use non-lazy stacks for small, fixed-size content to avoid lazy overhead.
-- Keep IDs stable when using `ScrollViewReader`.
+- Keep IDs stable for `ScrollPosition` tracking; changing IDs causes position jumps.
 - Prefer explicit animations (`withAnimation`) when scrolling to an ID.
 
 ## iOS 26 Scroll Edge Effects

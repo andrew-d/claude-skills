@@ -39,8 +39,8 @@
     },
     {
       "name": "swift-ios-skills--swift-core-skills",
-      "version": "3.1.0",
-      "description": "Core Swift language features, concurrency, testing, SwiftData, Charts, and Codable",
+      "version": "3.4.0",
+      "description": "Core Swift language features, concurrency, API design guidelines, testing, SwiftData, Core Data, Charts, Codable, FormatStyle, and architecture patterns",
       "source": "./plugins/swift-ios-skills--swift-core-skills",
       "author": {
         "name": "Derek Pearson"
@@ -48,8 +48,8 @@
     },
     {
       "name": "swift-ios-skills--swiftui-skills",
-      "version": "3.1.0",
-      "description": "SwiftUI patterns, navigation, gestures, layout, animation, Liquid Glass, WebKit, performance, and UIKit interop",
+      "version": "3.4.0",
+      "description": "SwiftUI patterns, focus, navigation, gestures, layout, animation, Liquid Glass, WebKit, performance, and UIKit interop",
       "source": "./plugins/swift-ios-skills--swiftui-skills",
       "author": {
         "name": "Derek Pearson"
@@ -68,7 +68,7 @@
     },
     {
       "name": "trailofbits--gh-cli",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "description": "Intercepts GitHub URL fetches and curl/wget commands, redirecting to the authenticated gh CLI.",
       "source": "./plugins/trailofbits--gh-cli",
       "author": {

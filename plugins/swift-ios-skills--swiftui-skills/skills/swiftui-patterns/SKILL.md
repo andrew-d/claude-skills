@@ -1,6 +1,6 @@
 ---
 name: swiftui-patterns
-description: "Build SwiftUI views with modern MV architecture, state management, and view composition patterns. Covers @Observable ownership rules, @State/@Bindable/@Environment wiring, view decomposition, custom ViewModifiers, environment values, async data loading with .task, iOS 26+ APIs, Writing Tools, and performance guidelines. Use when structuring a SwiftUI app, managing state with @Observable, composing view hierarchies, or applying SwiftUI best practices."
+description: "Builds SwiftUI views with modern MV architecture, state management, and view composition patterns. Covers @Observable ownership rules, @State/@Bindable/@Environment wiring, view decomposition, custom ViewModifiers, environment values, async data loading with .task, iOS 26+ APIs, Writing Tools, and performance guidelines. Use when structuring a SwiftUI app, managing state with @Observable, composing view hierarchies, or applying SwiftUI best practices."
 ---
 
 # SwiftUI Patterns
@@ -178,7 +178,7 @@ var body: some View {
 }
 
 private var header: some View {
-    VStack(alignment: .leading, spacing: 6) {
+    VStack(alignment: .leading) {
         Text(title).font(.title2)
         Text(subtitle).font(.subheadline)
     }
@@ -209,7 +209,7 @@ struct CardStyle: ViewModifier {
         content
             .padding()
             .background(.background)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(.rect(cornerRadius: 12))
             .shadow(radius: 2)
     }
 }
@@ -224,22 +224,23 @@ Avoid top-level conditional view swapping. Prefer a single stable base view with
 
 ### Custom Environment Values
 
-```swift
-private struct ThemeKey: EnvironmentKey {
-    static let defaultValue: Theme = .default
-}
+Use `@Entry` for custom environment values and actions. It generates the entry boilerplate for `EnvironmentValues`.
 
+```swift
 extension EnvironmentValues {
-    var theme: Theme {
-        get { self[ThemeKey.self] }
-        set { self[ThemeKey.self] = newValue }
-    }
+    @Entry var theme: Theme = .default
+    @Entry var refreshFeed: @Sendable () async -> Void = {}
 }
 
 // Usage
 .environment(\.theme, customTheme)
-@Environment(\.theme) var theme
+.environment(\.refreshFeed) { await feedStore.refresh() }
+
+@Environment(\.theme) private var theme
+@Environment(\.refreshFeed) private var refreshFeed
 ```
+
+For iOS 17-compatible code or older compatibility shims, use manual `EnvironmentKey` types instead.
 
 ### Common Built-in Environment Values
 
@@ -303,6 +304,7 @@ Follow Apple Human Interface Guidelines for layout, typography, color, and acces
 - Use semantic colors (`Color.primary`, `.secondary`, `Color(uiColor: .systemBackground)`) for automatic light/dark mode
 - Use system font styles (`.title`, `.headline`, `.body`, `.caption`) for Dynamic Type support
 - Use `ContentUnavailableView` for empty and error states
+- Omit `spacing:` on stacks unless a specific value is required — `nil` (the default) uses platform-appropriate adaptive spacing
 - Support adaptive layouts via `horizontalSizeClass`
 - Provide VoiceOver labels (`.accessibilityLabel`) and support Dynamic Type accessibility sizes by switching layout orientation
 
@@ -315,7 +317,7 @@ Control the Apple Intelligence Writing Tools experience on text views with `.wri
 | Level | Effect | When to use |
 |-------|--------|-------------|
 | `.complete` | Full inline rewriting (proofread, rewrite, transform) | Notes, email, documents |
-| `.limited` | Overlay panel only — original text untouched | Code editors, validated forms |
+| `.limited` | Reduced overlay-panel experience | Code editors, validated forms |
 | `.disabled` | Writing Tools hidden entirely | Passwords, search bars |
 | `.automatic` | System chooses based on context (default) | Most views |
 
@@ -340,9 +342,31 @@ TextField("Search…", text: $query)
 6. Over-using `@State` -- only for view-local state; shared state belongs in `@Observable`
 7. Not extracting subviews -- long body blocks are hard to read and optimize
 8. Using `NavigationView` -- deprecated; use `NavigationStack`
-9. Inline closures in body -- extract complex closures to methods
-10. `.sheet(isPresented:)` when state represents a model -- use `.sheet(item:)` instead
-11. **Using `AnyView` for type erasure** -- causes identity resets and disables diffing. Use `@ViewBuilder`, `Group`, or generics instead. See [references/deprecated-migration.md](references/deprecated-migration.md)
+9. Reaching for `foregroundColor(_:)` when `foregroundStyle(_:)` better matches semantic styling
+10. Inline closures in body -- extract complex closures to methods
+11. `.sheet(isPresented:)` when state represents a model -- use `.sheet(item:)` instead
+12. **Using `AnyView` for type erasure** -- causes identity resets and disables diffing. Use `@ViewBuilder`, `Group`, or generics instead. See [references/deprecated-migration.md](references/deprecated-migration.md)
+13. **Putting `@AppStorage` inside an `@Observable` class** -- `@AppStorage` is a SwiftUI `DynamicProperty`; it only triggers view updates when used directly in a `View`. Inside an `@Observable` class, observation tracking never sees the change. Keep `@AppStorage` in views, or read/write `UserDefaults` directly inside the `@Observable` class:
+
+```swift
+// Wrong -- @AppStorage is invisible to @Observable tracking
+@MainActor @Observable final class Settings {
+    @AppStorage("theme") var theme: String = "system" // view won't update
+}
+
+// Right -- UserDefaults read/write with a normal stored property
+@MainActor @Observable final class Settings {
+    var theme: String {
+        didSet { UserDefaults.standard.set(theme, forKey: "theme") }
+    }
+
+    init() {
+        theme = UserDefaults.standard.string(forKey: "theme") ?? "system"
+    }
+}
+```
+
+14. Hard-coding `spacing:` on every stack -- omit it to get adaptive platform spacing; only specify when the value is intentional
 
 ## Review Checklist
 
@@ -355,12 +379,14 @@ TextField("Search…", text: $query)
 - [ ] Views decomposed into focused subviews
 - [ ] No heavy computation in view `body`
 - [ ] Environment used for deeply shared state
+- [ ] `foregroundStyle(_:)` used when semantic styling is preferable to a fixed color
 - [ ] Custom `ViewModifier` for repeated styling
 - [ ] `.sheet(item:)` preferred over `.sheet(isPresented:)`
 - [ ] Sheets own their actions and call `dismiss()` internally
 - [ ] MV pattern followed -- no unnecessary view models
 - [ ] `@Observable` view model classes are `@MainActor`-isolated
 - [ ] Model types passed across concurrency boundaries are `Sendable`
+- [ ] Stack `spacing:` omitted unless a specific value is required (prefer adaptive default)
 
 ## References
 

@@ -176,31 +176,33 @@ struct BounceView: View {
     @State private var trigger = false
 
     var body: some View {
-        Image(systemName: "star.fill")
-            .font(.largeTitle)
-            .keyframeAnimator(
-                initialValue: AnimValues(),
-                trigger: trigger
-            ) { content, value in
-                content
-                    .scaleEffect(value.scale)
-                    .offset(y: value.yOffset)
-                    .opacity(value.opacity)
-            } keyframes: { _ in
-                KeyframeTrack(\.scale) {
-                    SpringKeyframe(1.5, duration: 0.3)
-                    CubicKeyframe(1.0, duration: 0.4)
+        Button { trigger.toggle() } label: {
+            Image(systemName: "star.fill")
+                .font(.largeTitle)
+                .keyframeAnimator(
+                    initialValue: AnimValues(),
+                    trigger: trigger
+                ) { content, value in
+                    content
+                        .scaleEffect(value.scale)
+                        .offset(y: value.yOffset)
+                        .opacity(value.opacity)
+                } keyframes: { _ in
+                    KeyframeTrack(\.scale) {
+                        SpringKeyframe(1.5, duration: 0.3)
+                        CubicKeyframe(1.0, duration: 0.4)
+                    }
+                    KeyframeTrack(\.yOffset) {
+                        CubicKeyframe(-30, duration: 0.2)
+                        CubicKeyframe(0, duration: 0.4)
+                    }
+                    KeyframeTrack(\.opacity) {
+                        LinearKeyframe(0.6, duration: 0.15)
+                        LinearKeyframe(1.0, duration: 0.25)
+                    }
                 }
-                KeyframeTrack(\.yOffset) {
-                    CubicKeyframe(-30, duration: 0.2)
-                    CubicKeyframe(0, duration: 0.4)
-                }
-                KeyframeTrack(\.opacity) {
-                    LinearKeyframe(0.6, duration: 0.15)
-                    LinearKeyframe(1.0, duration: 0.25)
-                }
-            }
-            .onTapGesture { trigger.toggle() }
+        }
+        .buttonStyle(.plain)
     }
 }
 ```
@@ -245,23 +247,28 @@ struct HeroView: View {
     @State private var isExpanded = false
 
     var body: some View {
-        if isExpanded {
-            DetailCard()
-                .matchedGeometryEffect(id: "card", in: heroSpace)
-                .onTapGesture {
+        Group {
+            if isExpanded {
+                Button {
                     withAnimation(.spring(duration: 0.4, bounce: 0.2)) {
                         isExpanded = false
                     }
+                } label: {
+                    DetailCard()
+                        .matchedGeometryEffect(id: "card", in: heroSpace)
                 }
-        } else {
-            ThumbnailCard()
-                .matchedGeometryEffect(id: "card", in: heroSpace)
-                .onTapGesture {
+            } else {
+                Button {
                     withAnimation(.spring(duration: 0.4, bounce: 0.2)) {
                         isExpanded = true
                     }
+                } label: {
+                    ThumbnailCard()
+                        .matchedGeometryEffect(id: "card", in: heroSpace)
                 }
+            }
         }
+        .buttonStyle(.plain)
     }
 }
 ```

@@ -126,7 +126,7 @@ struct ReorderableList: View {
     @State private var dragOffset = CGSize.zero
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack {
             ForEach(items, id: \.self) { item in
                 ItemRow(title: item, isDragging: draggingItem == item)
                     .offset(y: draggingItem == item ? dragOffset.height : 0)
@@ -183,7 +183,7 @@ struct ItemRow: View {
         Text(title)
             .frame(maxWidth: .infinity, minHeight: 46)
             .background(isDragging ? Color.blue.opacity(0.2) : Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(.rect(cornerRadius: 8))
             .shadow(radius: isDragging ? 4 : 0)
             .scaleEffect(isDragging ? 1.05 : 1.0)
     }

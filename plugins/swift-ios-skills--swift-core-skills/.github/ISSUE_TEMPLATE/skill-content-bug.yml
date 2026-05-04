@@ -19,6 +19,7 @@ body:
         - alarmkit
         - app-clips
         - app-intents
+        - app-store-optimization
         - app-store-review
         - apple-on-device-ai
         - appmigrationkit
@@ -32,6 +33,7 @@ body:
         - cloudkit
         - contacts-framework
         - core-bluetooth
+        - core-data
         - core-motion
         - core-nfc
         - coreml
@@ -43,13 +45,14 @@ body:
         - energykit
         - eventkit
         - financekit
+        - focus-engine
         - gamekit
         - healthkit
         - homekit
         - ios-accessibility
         - ios-localization
         - ios-networking
-        - ios-security
+        - ios-simulator
         - mapkit
         - metrickit
         - musickit
@@ -69,12 +72,17 @@ body:
         - speech-recognition
         - spritekit
         - storekit
+        - swift-api-design-guidelines
+        - swift-architecture
         - swift-charts
         - swift-codable
         - swift-concurrency
+        - swift-formatstyle
         - swift-language
+        - swift-security
         - swift-testing
         - swiftdata
+        - swiftlint
         - swiftui-animation
         - swiftui-gestures
         - swiftui-layout-components
