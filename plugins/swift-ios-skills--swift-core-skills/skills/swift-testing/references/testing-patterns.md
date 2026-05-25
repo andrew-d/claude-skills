@@ -5,6 +5,7 @@
 - Expectations and Requirements
 - Suite Organization
 - Parameterized Tests
+- Execution Model
 - Confirmation and Known Issues
 - Tags
 - TestScoping and Test Organization
@@ -17,6 +18,7 @@
 - Test Attachments
 - Exit Testing
 - Test File Organization
+- What to Test
 - Common Mistakes and Review Checklist
 
 ## Basic Tests and Traits
@@ -139,6 +141,26 @@ func currencySymbols(code: String, symbol: String) {
 
 Each argument combination runs as an independent test case reported separately.
 
+## Execution Model
+
+Swift Testing uses Swift Concurrency and runs tests in parallel by default. Treat every test as isolated work unless you explicitly serialize a scope.
+
+```swift
+@Suite(.serialized, .tags(.database))
+struct DatabaseTests {
+    @Test func insertsRecord() async throws { /* ... */ }
+    @Test func removesRecord() async throws { /* ... */ }
+}
+```
+
+Use `.serialized` when tests must not overlap because they touch shared external state like a keychain, database, singleton service, or filesystem location. It does not make unrelated tests outside the serialized scope run one-at-a-time.
+
+Important implications:
+- Each test gets its own suite instance.
+- Declaration order is not a contract.
+- If one logical workflow depends on previous state, keep that workflow inside one test.
+- Prefer isolated fixtures over shared mutable globals.
+
 ## Confirmation and Known Issues
 
 ### Confirmation (Async Event Testing)
@@ -212,26 +234,28 @@ Filter tests by tag in Xcode test plans or CLI (tag-based filtering syntax varie
 
 ## TestScoping and Test Organization
 
-`TestScoping` consolidates per-test setup/teardown into reusable fixtures:
+`TestScoping` consolidates per-test setup/teardown into reusable fixtures when attached through a custom trait:
 
 ```swift
-struct DatabaseFixture: TestScoping {
-    let db: TestDatabase
-
+struct DatabaseScope: TestTrait, SuiteTrait, TestScoping {
     func provideScope(
-        for test: Test, testCase: Test.Case?,
+        for test: Test,
+        testCase: Test.Case?,
         performing body: @Sendable () async throws -> Void
     ) async throws {
         let db = try await TestDatabase.create()
+        defer { Task { try? await db.destroy() } }
         try await body()
-        try await db.destroy()
     }
 }
 
-// Use with @Test trait
-@Test(.tags(.database))
+extension Trait where Self == DatabaseScope {
+    static var databaseScope: Self { .init() }
+}
+
+@Test(.databaseScope, .tags(.database))
 func insertsRecord() async throws {
-    // DatabaseFixture.provideScope wraps this test
+    // Test runs inside DatabaseScope.provideScope
 }
 ```
 
@@ -402,7 +426,7 @@ Performance tests require XCTest — not available in Swift Testing.
 
 ## Snapshot Testing
 
-Use swift-snapshot-testing (pointfreeco) for visual regression. Requires XCTest:
+Add Point-Free's `SnapshotTesting` package to the test target via Swift Package Manager, then use it for visual regression. Requires XCTest:
 
 ```swift
 import SnapshotTesting
@@ -434,15 +458,15 @@ Attach diagnostic data to test results for debugging failures:
 @Test func generateReport() async throws {
     let report = try generateReport()
     // Attach the output for later inspection
-    Attachment(report.data, named: "report.json").record()
+    Attachment.record(report.data, named: "report.json")
     #expect(report.isValid)
 }
 
 // Attach from a file URL
 @Test func processImage() async throws {
     let output = try processImage()
-    try await Attachment(contentsOf: output.url, named: "result.png")
-        .record()
+    let attachment = try await Attachment(contentsOf: output.url, named: "result.png")
+    Attachment.record(attachment)
 }
 ```
 
@@ -479,17 +503,59 @@ Name test files `<TypeUnderTest>Tests.swift`. Describe behavior in function name
 
 **Skip:** SwiftUI view body layout (use snapshots), simple property forwarding, Apple framework behavior, private methods (test through public API).
 
+## CustomTestStringConvertible
+
+When parameterized test arguments appear in test output, Swift Testing uses `String(describing:)` by default. Conform to `CustomTestStringConvertible` for better output:
+
+```swift
+enum Food: CaseIterable {
+    case paella, oden, ragu
+}
+
+extension Food: CustomTestStringConvertible {
+    var testDescription: String {
+        switch self {
+        case .paella: "paella valenciana"
+        case .oden: "おでん"
+        case .ragu: "ragù alla bolognese"
+        }
+    }
+}
+
+@Test(arguments: Food.allCases)
+func isDelicious(_ food: Food) { /* output shows custom descriptions */ }
+```
+
+Use this for any type passed as a parameterized test argument where the default description is unclear — especially enums, IDs, or model types.
+
+## Availability-Conditional Tests
+
+Use `@available` on test functions to run tests only on specific OS versions:
+
+```swift
+@Test
+@available(iOS 18, macOS 15, *)
+func usesNewAPI() async throws {
+    let result = try await NewFramework.process()
+    #expect(result.isValid)
+}
+```
+
+Swift Testing skips `@available`-gated tests when running on older OS versions. This replaces XCTest's `#available` guard + early return pattern.
+
 ## Common Mistakes and Review Checklist
 
 1. **Testing implementation, not behavior.** Test what the code does, not how.
 2. **No error path tests.** If a function can throw, test the throw path.
 3. **Flaky async tests.** Use `confirmation` with expected counts, not `sleep` calls.
-4. **Shared mutable state between tests.** Each test sets up its own state via `init()` in `@Suite`.
+4. **Shared mutable state between tests.** Each test sets up its own state via `init()` in `@Suite` or a fixture.
 5. **Missing accessibility identifiers in UI tests.** XCUITest queries rely on them.
 6. **Using `sleep` in tests.** Use `confirmation`, clock injection, or `withKnownIssue`.
 7. **Not testing cancellation.** If code supports `Task` cancellation, verify it cancels cleanly.
 8. **Mixing XCTest and Swift Testing in one file.** Keep them in separate files.
 9. **Non-Sendable test helpers shared across tests.** Ensure test helper types are Sendable when shared across concurrent test cases.
+10. **Assuming test order.** Parallel default execution means declaration order and suite nesting do not create a workflow.
+11. **Using `.serialized` as a dependency chain.** Serialized scopes avoid overlap; they do not pass state from one test to the next.
 
 ### Review Checklist
 
@@ -501,4 +567,6 @@ Name test files `<TypeUnderTest>Tests.swift`. Describe behavior in function name
 - [ ] Tags applied for filtering (`.critical`, `.slow`)
 - [ ] Mocks conform to protocols, not subclass concrete types
 - [ ] No shared mutable state between tests
+- [ ] Tests do not rely on declaration order or shared suite instances
+- [ ] `.serialized` is reserved for exclusive state, not workflow sequencing
 - [ ] Cancellation tested for cancellable async operations

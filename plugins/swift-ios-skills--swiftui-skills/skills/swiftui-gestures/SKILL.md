@@ -18,7 +18,7 @@ Swift 6.3 patterns.
 - [MagnifyGesture (iOS 17+)](#magnifygesture-ios-17)
 - [RotateGesture (iOS 17+)](#rotategesture-ios-17)
 - [Gesture Composition](#gesture-composition)
-- [@GestureState](#gesturestate)
+- [`@GestureState`](#gesturestate)
 - [Adding Gestures to Views](#adding-gestures-to-views)
 - [Custom Gesture Protocol](#custom-gesture-protocol)
 - [Common Mistakes](#common-mistakes)
@@ -224,7 +224,7 @@ let doubleTapOrLongPress = TapGesture(count: 2)
     }
 ```
 
-## @GestureState
+## `@GestureState`
 
 `@GestureState` is a property wrapper that **automatically resets** to its
 initial value when the gesture ends. Use for transient feedback; use `@State`
@@ -354,7 +354,7 @@ VStack {
 .simultaneousGesture(TapGesture().onEnded { parentAction() })
 ```
 
-### 2. Using @State instead of @GestureState for transient state
+### 2. Using `@State` instead of `@GestureState` for transient state
 
 ```swift
 // DON'T: @State doesn't auto-reset — view stays offset after gesture ends
@@ -396,7 +396,7 @@ LongPressGesture(minimumDuration: 2.0)
 // DON'T: Deprecated since iOS 17
 MagnificationGesture()   // deprecated — use MagnifyGesture()
 
-// PREFER: Newer gesture types
+// DO: Use newer gesture types
 MagnifyGesture()         // iOS 17+
 RotateGesture()          // iOS 17+ (newer alternative to RotationGesture)
 ```
@@ -422,6 +422,28 @@ DragGesture()
     }
 ```
 
+### 6. Using onTapGesture for actions that should be a Button
+
+```swift
+// DON'T: onTapGesture has no accessibility traits, VoiceOver role,
+// Voice Control targeting, Switch Control scanning, or keyboard activation
+Text("Delete")
+    .onTapGesture { deleteItem() }
+
+// DO: Button provides all of these automatically
+Button("Delete", role: .destructive) { deleteItem() }
+
+// DO: For custom visuals, use ButtonStyle instead of onTapGesture
+Button { toggleExpanded() } label: {
+    CardView()
+}
+.buttonStyle(.plain)
+```
+
+Reserve `onTapGesture` for multi-tap (`count: 2+`), tap-location-dependent
+behavior, or adding tap recognition to non-interactive content that already
+has appropriate accessibility traits.
+
 ## Review Checklist
 
 - [ ] Correct gesture type: `MagnifyGesture`/`RotateGesture` (not deprecated `Magnification`/`Rotation` variants)
@@ -434,6 +456,7 @@ DragGesture()
 - [ ] Custom `Gesture` conformances use `var body: some Gesture` (not `View`)
 - [ ] Gesture-driven animations use `.spring` or similar for natural deceleration
 - [ ] `GestureMask` considered when mixing gestures across view hierarchy levels
+- [ ] `onTapGesture` only used where `count > 1`, tap location, or coordinate space matters — plain single-tap actions use `Button` instead
 
 ## References
 

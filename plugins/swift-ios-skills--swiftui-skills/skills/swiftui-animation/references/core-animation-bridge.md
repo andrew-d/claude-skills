@@ -398,12 +398,12 @@ struct WaveView: View {
     @State private var isAnimating = true
 
     var body: some View {
-        AnimatedLayerView(isAnimating: isAnimating, color: .blue)
-            .frame(height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .onTapGesture {
-                isAnimating.toggle()
-            }
+        Button { isAnimating.toggle() } label: {
+            AnimatedLayerView(isAnimating: isAnimating, color: .blue)
+                .frame(height: 200)
+                .clipShape(.rect(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
     }
 }
 ```

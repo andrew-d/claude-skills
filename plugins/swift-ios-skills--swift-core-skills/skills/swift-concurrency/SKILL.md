@@ -19,7 +19,7 @@ behavior changes.
 - [Task Cancellation](#task-cancellation)
 - [Actor Reentrancy](#actor-reentrancy)
 - [AsyncSequence and AsyncStream](#asyncsequence-and-asyncstream)
-- [@Observable and Concurrency](#observable-and-concurrency)
+- [`@Observable and Concurrency`](#observable-and-concurrency)
 - [Synchronization Primitives](#synchronization-primitives)
 - [Common Mistakes](#common-mistakes)
 - [Review Checklist](#review-checklist)
@@ -128,7 +128,7 @@ final class StickerModel {
 
 Use `@concurrent` to explicitly request background execution when needed.
 
-### @concurrent Attribute
+### `@concurrent` Attribute
 
 `@concurrent` ensures a function always runs on the concurrent thread pool,
 freeing the calling actor to run other tasks.
@@ -350,7 +350,7 @@ let stream = AsyncStream<Location> { continuation in
 Use `withCheckedContinuation` / `withCheckedThrowingContinuation` for
 single-value callbacks. Resume exactly once.
 
-## @Observable and Concurrency
+## `@Observable` and Concurrency
 
 - `@Observable` classes should be `@MainActor` for view models.
 - Use `@State` to own an `@Observable` instance (replaces `@StateObject`).
@@ -412,12 +412,11 @@ and a decision guide for choosing locks vs actors.
 
 ## References
 
-- See [references/concurrency-patterns.md](references/concurrency-patterns.md) for detailed approachable concurrency patterns,
-  patterns, and migration examples.
-- See [references/approachable-concurrency.md](references/approachable-concurrency.md) for the approachable concurrency
-  mode quick-reference guide.
-- See [references/swiftui-concurrency.md](references/swiftui-concurrency.md) for SwiftUI-specific concurrency
-  guidance.
-- See [references/synchronization-primitives.md](references/synchronization-primitives.md) for Mutex, OSAllocatedUnfairLock,
-  and guidance on choosing locks vs actors.
+- [references/concurrency-patterns.md](references/concurrency-patterns.md) — detailed concurrency patterns and migration examples
+- [references/approachable-concurrency.md](references/approachable-concurrency.md) — approachable concurrency mode quick-reference
+- [references/swiftui-concurrency.md](references/swiftui-concurrency.md) — SwiftUI-specific concurrency guidance
+- [references/synchronization-primitives.md](references/synchronization-primitives.md) — Mutex, OSAllocatedUnfairLock, locks vs actors
+- [references/bridging-interop.md](references/bridging-interop.md) — checked continuations, delegate bridging, GCD migration table
+- [references/diagnostics.md](references/diagnostics.md) — compiler diagnostic → fix reference, strict concurrency adoption
+- [references/async-algorithms.md](references/async-algorithms.md) — swift-async-algorithms: debounce, throttle, merge, combineLatest, chunks
 

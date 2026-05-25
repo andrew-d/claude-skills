@@ -117,7 +117,7 @@ final class DashboardViewController: UIViewController {
 }
 ```
 
-### With @Observable Model
+### With `@Observable` Model
 
 Pass an `@Observable` model to avoid reassigning `rootView` manually. SwiftUI tracks changes automatically:
 
@@ -247,7 +247,7 @@ extension EnvironmentValues {
 
 ## 4. Data Sharing Between UIKit and SwiftUI
 
-### Using @Observable (iOS 17+)
+### Using `@Observable` (iOS 17+)
 
 The cleanest approach. Create an `@Observable` model, pass it to both UIKit and SwiftUI code:
 
@@ -373,7 +373,7 @@ func collectionView(
                 ProgressView()
             }
             .frame(width: 60, height: 60)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(.rect(cornerRadius: 8))
 
             VStack(alignment: .leading) {
                 Text(item.title).font(.headline)

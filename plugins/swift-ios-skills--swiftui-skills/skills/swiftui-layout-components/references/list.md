@@ -8,7 +8,7 @@ Use `List` for feed-style content and settings-style rows where built-in row reu
 
 - Prefer `List` for long, vertically scrolling content with repeated rows.
 - Use `Section` headers to group related rows.
-- Pair with `ScrollViewReader` when you need scroll-to-top or jump-to-id.
+- Use `ScrollPosition` with `.scrollPosition($scrollPosition)` for scroll-to-top or jump-to-id.
 - Use `.listStyle(.plain)` for modern feed layouts.
 - Use `.listStyle(.grouped)` for multi-section discovery/search pages where section grouping helps.
 - Apply `.scrollContentBackground(.hidden)` + a custom background when you need a themed surface.
@@ -21,32 +21,23 @@ Use `List` for feed-style content and settings-style rows where built-in row reu
 @MainActor
 struct TimelineListView: View {
   @Environment(\.selectedTabScrollToTop) private var selectedTabScrollToTop
-  @State private var scrollToId: String?
+  @State private var scrollPosition = ScrollPosition(idType: String.self)
 
   var body: some View {
-    ScrollViewReader { proxy in
-      List {
-        ForEach(items) { item in
-          TimelineRow(item: item)
-            .id(item.id)
-            .listRowInsets(.init(top: 12, leading: 16, bottom: 6, trailing: 16))
-            .listRowSeparator(.hidden)
-        }
+    List {
+      ForEach(items) { item in
+        TimelineRow(item: item)
+          .id(item.id)
+          .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 16))
+          .listRowSeparator(.hidden)
       }
-      .listStyle(.plain)
-      .environment(\.defaultMinListRowHeight, 1)
-      .onChange(of: scrollToId) { _, newValue in
-        if let newValue {
-          proxy.scrollTo(newValue, anchor: .top)
-          scrollToId = nil
-        }
-      }
-      .onChange(of: selectedTabScrollToTop) { _, newValue in
-        if newValue == 0 {
-          withAnimation {
-            proxy.scrollTo(ScrollToView.Constants.scrollToTop, anchor: .top)
-          }
-        }
+    }
+    .listStyle(.plain)
+    .environment(\.defaultMinListRowHeight, 1)
+    .scrollPosition($scrollPosition)
+    .onChange(of: selectedTabScrollToTop) {
+      withAnimation {
+        scrollPosition.scrollTo(edge: .top)
       }
     }
   }

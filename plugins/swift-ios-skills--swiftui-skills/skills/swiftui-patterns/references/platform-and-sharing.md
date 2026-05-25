@@ -264,21 +264,23 @@ struct MediaPreviewRow: View {
     ScrollView(.horizontal, showsIndicators: false) {
       HStack {
         ForEach(attachments) { attachment in
-          LazyImage(url: attachment.previewURL) { state in
-            if let image = state.image {
-              image.resizable().aspectRatio(contentMode: .fill)
-            } else {
-              ProgressView()
-            }
-          }
-          .frame(width: 120, height: 120)
-          .clipped()
-          .onTapGesture {
+          Button {
             quickLook.prepareFor(
               selectedMediaAttachment: attachment,
               mediaAttachments: attachments
             )
+          } label: {
+            LazyImage(url: attachment.previewURL) { state in
+              if let image = state.image {
+                image.resizable().aspectRatio(contentMode: .fill)
+              } else {
+                ProgressView()
+              }
+            }
+            .frame(width: 120, height: 120)
+            .clipped()
           }
+          .buttonStyle(.plain)
         }
       }
     }
@@ -343,7 +345,7 @@ content
   .safeAreaInset(edge: .top, spacing: 0) {
     VStack(spacing: 0) {
       TopSelectorView()
-        .padding(.vertical, 8)
+        .padding(.vertical)
         .padding(.horizontal, .layoutPadding)
         .background(Color.primary.opacity(0.06))
         .background(Material.ultraThin)
@@ -476,24 +478,26 @@ Use a bottom-anchored input bar for chat, composer, or quick actions without fig
 @MainActor
 struct ConversationView: View {
   @FocusState private var isInputFocused: Bool
+  @State private var scrollPosition = ScrollPosition(edge: .bottom)
+  @State private var draft = ""
 
   var body: some View {
-    ScrollViewReader { _ in
-      ScrollView {
-        LazyVStack {
-          ForEach(messages) { message in
-            MessageRow(message: message)
-          }
+    ScrollView {
+      LazyVStack {
+        ForEach(messages) { message in
+          MessageRow(message: message)
         }
-        .padding(.horizontal, .layoutPadding)
       }
-      .safeAreaInset(edge: .bottom) {
-        InputBar(text: $draft)
-          .focused($isInputFocused)
-      }
-      .scrollDismissesKeyboard(.interactively)
-      .onAppear { isInputFocused = true }
+      .scrollTargetLayout()
+      .padding(.horizontal, .layoutPadding)
     }
+    .scrollPosition($scrollPosition)
+    .safeAreaInset(edge: .bottom) {
+      InputBar(text: $draft)
+        .focused($isInputFocused)
+    }
+    .scrollDismissesKeyboard(.interactively)
+    .onAppear { isInputFocused = true }
   }
 }
 ```

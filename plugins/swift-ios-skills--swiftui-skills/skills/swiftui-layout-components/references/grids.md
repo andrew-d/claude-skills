@@ -61,7 +61,7 @@ Use `.adaptive` when you want the number of columns to respond to available
 width.
 
 ```swift
-let columns = [GridItem(.adaptive(minimum: 120, maximum: 240), spacing: 8)]
+let columns = [GridItem(.adaptive(minimum: 120, maximum: 240))]
 ```
 
 This is the best default for icon pickers, template choosers, and photo grids
@@ -73,9 +73,9 @@ Use multiple `.flexible` columns when you want a predictable column count.
 
 ```swift
 let columns = [
-    GridItem(.flexible(minimum: 100), spacing: 8),
-    GridItem(.flexible(minimum: 100), spacing: 8),
-    GridItem(.flexible(minimum: 100), spacing: 8),
+    GridItem(.flexible(minimum: 100)),
+    GridItem(.flexible(minimum: 100)),
+    GridItem(.flexible(minimum: 100)),
 ]
 ```
 
@@ -103,9 +103,9 @@ extra measurement work.
 ## Example: adaptive icon grid
 
 ```swift
-let columns = [GridItem(.adaptive(minimum: 120, maximum: 240), spacing: 6)]
+let columns = [GridItem(.adaptive(minimum: 120, maximum: 240))]
 
-LazyVGrid(columns: columns, spacing: 6) {
+LazyVGrid(columns: columns) {
     ForEach(icons) { icon in
         Button {
             select(icon)
@@ -114,7 +114,7 @@ LazyVGrid(columns: columns, spacing: 6) {
                 Image(icon.previewName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .cornerRadius(6)
+                    .clipShape(.rect(cornerRadius: 6))
 
                 if icon.isSelected {
                     Image(systemName: "checkmark.seal.fill")
@@ -149,7 +149,7 @@ LazyVGrid(
     ForEach(items) { item in
         ThumbnailView(item: item)
             .aspectRatio(1, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(.rect(cornerRadius: 8))
     }
 }
 ```
@@ -162,7 +162,7 @@ an adaptive count.
 Sectioned grids work well for grouped content like categories or recents.
 
 ```swift
-LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
+LazyVGrid(columns: [GridItem(.adaptive(minimum: 140))]) {
     ForEach(sections) { section in
         Section {
             ForEach(section.items) { item in
@@ -172,7 +172,7 @@ LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) 
             Text(section.title)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 12)
+                .padding(.top)
         }
     }
 }
